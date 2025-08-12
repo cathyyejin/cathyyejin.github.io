@@ -211,9 +211,9 @@ function App() {
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-full text-center px-4 z-10">
           <p className="text-lg mb-2 drop-shadow">2026년 5월 16일 토요일 오후 3시</p>
           <p className="text-lg mb-2 drop-shadow">국립외교원</p>
-          <div className="bg-white bg-opacity-80 text-gray-800 rounded-lg shadow-lg text-base inline-block px-4 py-2">
+          {/* <div className="bg-white bg-opacity-80 text-gray-800 rounded-lg shadow-lg text-base inline-block px-4 py-2">
             서울특별시 강남구 신사동 123-45
-          </div>
+          </div> */}
         </div>
         {/* Optional overlay for readability */}
         <div className="absolute inset-0 bg-black bg-opacity-40" />
