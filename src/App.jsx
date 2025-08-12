@@ -134,7 +134,7 @@ function App() {
         return (
           <div className="w-full max-w-2xl bg-white p-6 rounded-lg shadow-md text-center">
             <img
-              src="img/placeholder.png"
+              src="/img/placeholder.png"
               alt="Photo Booth Camera"
               className="mx-auto mb-6 max-w-full h-auto"
               style={{ maxWidth: '300px' }}
@@ -389,7 +389,7 @@ function App() {
             rel="noopener noreferrer"
             className="flex items-center bg-gray-50 text-gray-600 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
           >
-            <img src="img/tmap.png" alt="Tmap" className="w-5 h-5 mr-2" />
+            <img src="/img/tmap.png" alt="Tmap" className="w-5 h-5 mr-2" />
             티맵
           </a>
           <a
@@ -398,7 +398,7 @@ function App() {
             rel="noopener noreferrer"
             className="flex items-center bg-gray-50 text-gray-600 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
           >
-            <img src="img/kakao.png" alt="Kakao" className="w-5 h-5 mr-2" />
+            <img src="/img/kakao.png" alt="Kakao" className="w-5 h-5 mr-2" />
             카카오
           </a>
           <a
@@ -407,7 +407,7 @@ function App() {
             rel="noopener noreferrer"
             className="flex items-center bg-gray-50 text-gray-600 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
           >
-            <img src="img/naver.png" alt="Naver" className="w-5 h-5 mr-2" />
+            <img src="/img/naver.png" alt="Naver" className="w-5 h-5 mr-2" />
             네이버지도
           </a>
         </div>
