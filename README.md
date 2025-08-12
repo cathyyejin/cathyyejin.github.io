@@ -33,8 +33,6 @@ npm run build
 # preview the production build
 npm run preview
 
-```
-
 .
 ├─ index.html
 ├─ package.json
