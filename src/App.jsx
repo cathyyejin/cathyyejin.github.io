@@ -205,7 +205,7 @@ function App() {
       <section className="h-screen w-full bg-[url('/placeholder.jpg')] bg-cover bg-center relative overflow-hidden mb-16">
         {/* Centered Title */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full text-white px-4 z-10">
-          <h1 className="text-4xl mb-2 drop-shadow-lg font-maruburi-bold">구동민 & 김덕곤</h1>
+          <h1 className="text-4xl mb-2 drop-shadow-lg font-maruburi-bold">김덕곤 & 구동민</h1>
         </div>
         {/* Bottom Text Section */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-full text-center px-4 z-10">
