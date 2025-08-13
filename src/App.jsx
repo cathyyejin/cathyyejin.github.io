@@ -1,11 +1,11 @@
-import './App.css'
-import { useState } from 'react'
+import './App.css';
+import { useState } from 'react';
 
 function App() {
-  const [currentImage, setCurrentImage] = useState(0)
-  const [activeTab, setActiveTab] = useState('photo')
-  const [showGroomAccounts, setShowGroomAccounts] = useState(false)
-  const [showBrideAccounts, setShowBrideAccounts] = useState(false)
+  const [currentImage, setCurrentImage] = useState(0);
+  const [activeTab, setActiveTab] = useState('photo');
+  const [showGroomAccounts, setShowGroomAccounts] = useState(false);
+  const [showBrideAccounts, setShowBrideAccounts] = useState(false);
 
   // Sample images - replace with your actual images
   const images = [
@@ -13,28 +13,16 @@ function App() {
     'img/placeholder.png',
     'img/placeholder.png',
     'img/placeholder.png',
-    'img/placeholder.png'
-  ]
+    'img/placeholder.png',
+  ];
 
   const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length)
-  }
+    setCurrentImage((prev) => (prev + 1) % images.length);
+  };
 
   const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length)
-  }
-
-  // --- Inline SVG Icon Components (stroke, 24x24, currentColor) ---
-  // const IconSubway = (props) => (
-  //   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
-  //     <rect x="6" y="3" width="12" height="12" rx="2" />
-  //     <circle cx="9" cy="13" r="1" />
-  //     <circle cx="15" cy="13" r="1" />
-  //     <line x1="8" y1="19" x2="16" y2="19" />
-  //     <line x1="7" y1="21" x2="9" y2="19" />
-  //     <line x1="17" y1="21" x2="15" y2="19" />
-  //   </svg>
-  // )
+    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   const IconSubway = (props) => (
     <svg
@@ -50,16 +38,6 @@ function App() {
     </svg>
   );
 
-  // const IconBus = (props) => (
-  //   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
-  //     <rect x="4" y="5" width="16" height="11" rx="2" />
-  //     <path d="M4 10h16" />
-  //     <path d="M7 5h10" />
-  //     <circle cx="8" cy="16" r="1.25" />
-  //     <circle cx="16" cy="16" r="1.25" />
-  //   </svg>
-  // )
-
   const IconBus = (props) => (
     <svg
       viewBox="0 0 122.88 120.96"
@@ -74,15 +52,6 @@ function App() {
     </svg>
   );
 
-  // const IconCar = (props) => (
-  //   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
-  //     <path d="M3 13l2-5h14l2 5" />
-  //     <path d="M5 13h14" />
-  //     <circle cx="7.5" cy="17.5" r="1.25" />
-  //     <circle cx="16.5" cy="17.5" r="1.25" />
-  //     <path d="M7 8l2-2h6l2 2" />
-  //   </svg>
-  // )
   const IconCar = (props) => (
     <svg
       viewBox="0 0 122.88 103.26"
@@ -96,13 +65,6 @@ function App() {
       />
     </svg>
   );
-
-  // const IconParking = (props) => (
-  //   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
-  //     <rect x="4" y="4" width="16" height="16" rx="2" />
-  //     <path d="M10 16V8h3a2 2 0 110 4h-3" />
-  //   </svg>
-  // )
 
   const IconParking = (props) => (
     <svg
@@ -119,15 +81,16 @@ function App() {
   );
 
   const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text)
+    navigator.clipboard
+      .writeText(text)
       .then(() => {
-        alert('계좌번호가 복사되었습니다')
+        alert('계좌번호가 복사되었습니다');
       })
       .catch((err) => {
-        console.error('복사 실패:', err)
-        alert('계좌번호 복사에 실패했습니다.')
-      })
-  }
+        console.error('복사 실패:', err);
+        alert('계좌번호 복사에 실패했습니다.');
+      });
+  };
   const renderTabContent = () => {
     switch (activeTab) {
       case 'photo':
@@ -141,75 +104,147 @@ function App() {
             />
             <p className="text-gray-700 mb-2">포토부스가 설치될 예정입니다.</p>
             <p className="text-gray-700 mb-2">귀한 발걸음 해주신 여러분의</p>
-            <p className="text-gray-700 mb-2">환한 미소와 따뜻한 말씀 남겨주시면</p>
+            <p className="text-gray-700 mb-2">
+              환한 미소와 따뜻한 말씀 남겨주시면
+            </p>
             <p className="text-gray-700">소중히 간직하도록 하겠습니다.</p>
           </div>
-        )
+        );
       case 'meal':
         return (
           <div className="w-full max-w-2xl bg-white p-6 rounded-lg shadow-md text-center">
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">식사 안내</h3>
-              <p className="text-gray-700 mb-2">예식 후 식사가 준비되어 있습니다.</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                식사 안내
+              </h3>
+              <p className="text-gray-700 mb-2">
+                예식 후 식사가 준비되어 있습니다.
+              </p>
               <p className="text-gray-700 mb-2">맛있는 음식과 함께</p>
-              <p className="text-gray-700 mb-2">소중한 시간을 나누시기 바랍니다.</p>
+              <p className="text-gray-700 mb-2">
+                소중한 시간을 나누시기 바랍니다.
+              </p>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg">
               <p className="text-sm text-gray-600">식사 시간: 오후 6시 ~ 8시</p>
               <p className="text-sm text-gray-600">위치: 2층 레스토랑</p>
             </div>
           </div>
-        )
+        );
       case 'parking':
         return (
           <div className="w-full max-w-2xl bg-white p-6 rounded-lg shadow-md text-center">
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">주차 안내</h3>
-              <p className="text-gray-700 mb-2">건물 내 지하 주차장을 이용하실 수 있습니다.</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                주차 안내
+              </h3>
+              <p className="text-gray-700 mb-2">
+                건물 내 지하 주차장을 이용하실 수 있습니다.
+              </p>
               <p className="text-gray-700 mb-2">예식 참석자분들께는</p>
-              <p className="text-gray-700 mb-2">무료 주차 서비스를 제공합니다.</p>
+              <p className="text-gray-700 mb-2">
+                무료 주차 서비스를 제공합니다.
+              </p>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-gray-600">주차 시간: 3시간 무료</p>
               <p className="text-sm text-gray-600">위치: 지하 1층 ~ 3층</p>
             </div>
           </div>
-        )
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
   // --- Guest book state (mobile + modal) ---
   const [posts, setPosts] = useState([
-    { id: 1, name: '하객 A', content: '두 분 행복하세요 ✨', createdAt: new Date().toISOString() },
-  ])
-  const [isWriteOpen, setIsWriteOpen] = useState(false)
-  const [gbName, setGbName] = useState('')
-  const [gbPassword, setGbPassword] = useState('')
-  const [gbContent, setGbContent] = useState('')
-  const canSubmit = gbName.trim() && gbPassword.trim() && gbContent.trim()
+    {
+      id: 1,
+      name: '하객 A',
+      content: '두 분 행복하세요 ✨',
+      createdAt: new Date().toISOString(),
+      pin: '1234',
+    },
+  ]);
+  const [isWriteOpen, setIsWriteOpen] = useState(false);
+  const [gbName, setGbName] = useState('');
+  const [gbPassword, setGbPassword] = useState('');
+  const [gbContent, setGbContent] = useState('');
+  // const canSubmit = gbName.trim() && gbPassword.trim() && gbContent.trim()
+  const canSubmit = gbName.trim() && is4Digits(gbPassword) && gbContent.trim();
 
   // --- Guest book handlers ---
-  const openWrite = () => setIsWriteOpen(true)
-  const closeWrite = () => { setIsWriteOpen(false); setGbName(''); setGbPassword(''); setGbContent('') }
+  const openWrite = () => setIsWriteOpen(true);
+  const closeWrite = () => {
+    setIsWriteOpen(false);
+    setGbName('');
+    setGbPassword('');
+    setGbContent('');
+  };
+  // const submitWrite = (e) => {
+  //   e.preventDefault()
+  //   if (!canSubmit) return
+  //   const newPost = { id: Date.now(), name: gbName.trim(), content: gbContent.trim(), createdAt: new Date().toISOString() }
+  //   setPosts((prev) => [newPost, ...prev])
+  //   closeWrite()
+  // }
   const submitWrite = (e) => {
-    e.preventDefault()
-    if (!canSubmit) return
-    const newPost = { id: Date.now(), name: gbName.trim(), content: gbContent.trim(), createdAt: new Date().toISOString() }
-    setPosts((prev) => [newPost, ...prev])
-    closeWrite()
-  }
+    e.preventDefault();
+    if (!canSubmit) return;
+    const newPost = {
+      id: Date.now(),
+      name: gbName.trim(),
+      content: gbContent.trim(),
+      pin: gbPassword, // save the 4-digit PIN with the post
+      createdAt: new Date().toISOString(),
+    };
+    setPosts((prev) => [newPost, ...prev]);
+    closeWrite();
+  };
+  // helpers for 4-digit PIN
+  const digits4 = (v) => v.replace(/\D/g, '').slice(0, 4);
+  const is4Digits = (v) => /^\d{4}$/.test(v);
+
+  // password auth modal (for edit/delete)
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState(null); // 'edit' | 'delete'
+  const [authPost, setAuthPost] = useState(null);
+  const [authPin, setAuthPin] = useState('');
+  const [authError, setAuthError] = useState('');
+
+  // edit modal
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editContent, setEditContent] = useState('');
+
+  const openAuth = (mode, post) => {
+    setAuthMode(mode);
+    setAuthPost(post);
+    setAuthPin('');
+    setAuthError('');
+    setIsAuthOpen(true);
+  };
+  const closeAuth = () => {
+    setIsAuthOpen(false);
+    setAuthPin('');
+    setAuthError('');
+  };
+
   return (
     <div className="w-full">
       {/* Full-Screen Banner */}
       <section className="h-screen w-full bg-[url('/placeholder.jpg')] bg-cover bg-center relative overflow-hidden mb-16">
         {/* Centered Title */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full text-white px-4 z-10">
-          <h1 className="text-4xl mb-2 drop-shadow-lg font-maruburi-bold">김덕곤 & 구동민</h1>
+          <h1 className="text-4xl mb-2 drop-shadow-lg font-maruburi-bold">
+            김덕곤 & 구동민
+          </h1>
         </div>
         {/* Bottom Text Section */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-full text-center px-4 z-10">
-          <p className="text-lg mb-2 drop-shadow">2026년 5월 16일 토요일 오후 3시</p>
+          <p className="text-lg mb-2 drop-shadow">
+            2026년 5월 16일 토요일 오후 3시
+          </p>
           <p className="text-lg mb-2 drop-shadow">국립외교원</p>
           {/* <div className="bg-white bg-opacity-80 text-gray-800 rounded-lg shadow-lg text-base inline-block px-4 py-2">
             서울특별시 강남구 신사동 123-45
@@ -223,28 +258,39 @@ function App() {
 
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         {/* INVITATION */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">INVITATION</span>
+        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+          INVITATION
+        </span>
 
         {/* Main Heading */}
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">소중한 분들을 초대합니다</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+          소중한 분들을 초대합니다
+        </h2>
 
         {/* Multiline Quote */}
         <div className="text-center text-base text-gray-700 mb-6 leading-relaxed whitespace-pre-line">
-          우리가 서로 뜨겁게<br />
-          사랑한다는 것은<br />
-          그대는 나의 세상을<br />
-          나는 그대의 세상을<br />
-          함께 짊어지고 새벽을 향해<br />
+          우리가 서로 뜨겁게
+          <br />
+          사랑한다는 것은
+          <br />
+          그대는 나의 세상을
+          <br />
+          나는 그대의 세상을
+          <br />
+          함께 짊어지고 새벽을 향해
+          <br />
           걸어가겠다는 것입니다.
         </div>
 
         {/* Names and Family Info */}
         <div className="mb-6 text-center text-lg text-gray-900">
           <div className="mb-1">
-            성춘향 · 이몽룡 <span className="text-gray-600">의 아들</span> <span className="font-bold">덕곤</span>
+            성춘향 · 이몽룡 <span className="text-gray-600">의 아들</span>{' '}
+            <span className="font-bold">덕곤</span>
           </div>
           <div>
-            성춘향 · 이몽룡 <span className="text-gray-600">의 딸</span> <span className="font-bold">동민</span>
+            성춘향 · 이몽룡 <span className="text-gray-600">의 딸</span>{' '}
+            <span className="font-bold">동민</span>
           </div>
         </div>
 
@@ -257,7 +303,13 @@ function App() {
         {/* Calendar */}
         <div className="w-full max-w-xs border-t border-b border-gray-400 py-4 mb-2">
           <div className="grid grid-cols-7 text-center text-gray-700 font-medium mb-2">
-            <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+            <div>일</div>
+            <div>월</div>
+            <div>화</div>
+            <div>수</div>
+            <div>목</div>
+            <div>금</div>
+            <div>토</div>
           </div>
           {/* May 2026 Calendar with highlighted 16th */}
           <div className="grid grid-cols-7 text-center text-gray-900 gap-y-2">
@@ -287,7 +339,9 @@ function App() {
             <div className="h-8 flex items-center justify-center">14</div>
             <div className="h-8 flex items-center justify-center">15</div>
             <div className="h-8 flex items-center justify-center">
-              <div className="w-8 h-8 rounded-full bg-rose-300 flex items-center justify-center">16</div>
+              <div className="w-8 h-8 rounded-full bg-rose-300 flex items-center justify-center">
+                16
+              </div>
             </div>
 
             {/* Week 4 */}
@@ -323,8 +377,12 @@ function App() {
       {/* Gallery Section */}
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         {/* Section Title */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">GALLERY</span>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-8">우리의 이야기</h2>
+        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+          GALLERY
+        </span>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-8">
+          우리의 이야기
+        </h2>
 
         {/* Carousel */}
         <div className="w-full max-w-2xl relative">
@@ -341,8 +399,18 @@ function App() {
               onClick={prevImage}
               className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-lg hover:bg-opacity-100 transition-all"
             >
-              <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-6 h-6 text-gray-800"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
 
@@ -350,8 +418,18 @@ function App() {
               onClick={nextImage}
               className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-lg hover:bg-opacity-100 transition-all"
             >
-              <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-6 h-6 text-gray-800"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </div>
@@ -362,8 +440,9 @@ function App() {
               <button
                 key={index}
                 onClick={() => setCurrentImage(index)}
-                className={`w-3 h-3 rounded-full transition-all ${index === currentImage ? 'bg-gray-800' : 'bg-gray-300'
-                  }`}
+                className={`w-3 h-3 rounded-full transition-all ${
+                  index === currentImage ? 'bg-gray-800' : 'bg-gray-300'
+                }`}
               />
             ))}
           </div>
@@ -373,7 +452,9 @@ function App() {
       {/* Location Section */}
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         {/* Section Title */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">LOCATION</span>
+        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+          LOCATION
+        </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">오시는 길</h2>
 
         {/* Map Placeholder */}
@@ -382,7 +463,7 @@ function App() {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex flex-wrap justify-center gap-1 mb-8">
+        {/* <div className="w-full max-w-2xl mx-auto flex flex-nowrap gap-2 mb-8">
           <a
             href="https://tmap.co.kr"
             target="_blank"
@@ -399,7 +480,7 @@ function App() {
             className="flex items-center bg-gray-50 text-gray-600 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
           >
             <img src="/img/kakao.png" alt="Kakao" className="w-5 h-5 mr-2" />
-            카카오
+            카카오내비
           </a>
           <a
             href="https://naver.me/5uIYnFoR"
@@ -410,6 +491,64 @@ function App() {
             <img src="/img/naver.png" alt="Naver" className="w-5 h-5 mr-2" />
             네이버지도
           </a>
+        </div> */}
+        {/* Navigation Buttons */}
+        <div className="w-full max-w-2xl mx-auto mb-8">
+          <div className="grid grid-cols-3 gap-2">
+            <a
+              href="https://tmap.co.kr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5
+                 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-colors
+                 px-2 py-2
+                 whitespace-nowrap
+                 [font-size:clamp(13px,2.9vw,15px)]"
+            >
+              <img
+                src="/img/tmap.png"
+                alt="Tmap"
+                className="w-4 h-4 sm:w-5 sm:h-5"
+              />
+              티맵
+            </a>
+
+            <a
+              href="https://place.map.kakao.com/8490883"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5
+                 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-colors
+                 px-2 py-2
+                 whitespace-nowrap
+                 [font-size:clamp(13px,2.9vw,15px)]"
+            >
+              <img
+                src="/img/kakao.png"
+                alt="Kakao"
+                className="w-4 h-4 sm:w-5 sm:h-5"
+              />
+              카카오내비
+            </a>
+
+            <a
+              href="https://naver.me/5uIYnFoR"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5
+                 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-colors
+                 px-2 py-2
+                 whitespace-nowrap
+                 [font-size:clamp(13px,2.9vw,15px)]"
+            >
+              <img
+                src="/img/naver.png"
+                alt="Naver"
+                className="w-4 h-4 sm:w-5 sm:h-5"
+              />
+              네이버지도
+            </a>
+          </div>
         </div>
 
         {/* Detailed Directions */}
@@ -418,8 +557,18 @@ function App() {
           <div className="bg-gray-50 p-6 rounded-lg">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900">버스</h3>
@@ -433,8 +582,18 @@ function App() {
           <div className="bg-gray-50 p-6 rounded-lg">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  />
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900">지하철</h3>
@@ -447,22 +606,44 @@ function App() {
           <div className="bg-gray-50 p-6 rounded-lg">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                  />
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900">자가용</h3>
             </div>
             <p className="text-gray-700">건물 내 지하 주차장 이용 가능</p>
-            <p className="text-gray-600 text-sm">예식 참석자 무료 주차 (3시간)</p>
+            <p className="text-gray-600 text-sm">
+              예식 참석자 무료 주차 (3시간)
+            </p>
           </div>
 
           {/* Parking */}
           <div className="bg-gray-50 p-6 rounded-lg">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"
+                  />
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900">주차</h3>
@@ -515,7 +696,6 @@ function App() {
                 <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
                 <span>광역버스 : 9400, 9800, 1241, G9633</span>
               </div>
-
             </div>
           </div>
           {/* Subway Section */}
@@ -527,7 +707,6 @@ function App() {
                 {/* <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.5 2C2.5 1.17157 3.17157 0.5 4 0.5H14C14.8284 0.5 15.5 1.17157 15.5 2V15.5H2.5V2Z" />
                 </svg> */}
-
               </div>
               <h3 className="font-semibold text-lg">지하철</h3>
             </div>
@@ -568,18 +747,22 @@ function App() {
             </div>
             <div className="ml-11 space-y-2">
               <div className="bg-yellow-100 p-3 rounded">
-                <p className="font-medium">자가용 이용 시 무료 발레파킹, 무료주차 4시간</p>
+                <p className="font-medium">
+                  자가용 이용 시 무료 발레파킹, 무료주차 4시간
+                </p>
               </div>
               <p>양가 혼주 카운터에서 주차 등록 후 출차</p>
             </div>
           </div>
         </div>
-      </section >
+      </section>
 
       {/* Information Section */}
-      < section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16" >
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         {/* Section Title */}
-        < span className="block text-lg text-gray-500 tracking-widest mb-2" >INFORMATION</span >
+        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+          INFORMATION
+        </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">안내사항</h2>
 
         {/* Tab Buttons
@@ -671,10 +854,11 @@ function App() {
                   tabIndex={active ? 0 : -1}
                   onClick={() => setActiveTab(t.id)}
                   className={`py-3 text-sm font-medium text-center border-b-2
-            ${active
-                      ? 'text-gray-900 border-gray-900'
-                      : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
-                    }`}
+            ${
+              active
+                ? 'text-gray-900 border-gray-900'
+                : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+            }`}
                 >
                   {t.label}
                 </button>
@@ -685,26 +869,38 @@ function App() {
 
         {/* Tab Content */}
         {renderTabContent()}
-      </section >
+      </section>
 
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">ACCOUNT</span>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-8">마음 전하실 곳</h2>
+        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+          ACCOUNT
+        </span>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-8">
+          마음 전하실 곳
+        </h2>
         {/* Groom's Account Section */}
         <div className="w-full max-w-md bg-gray-50 rounded-lg shadow-sm overflow-hidden mb-4">
           <div
             className="flex justify-between items-center p-4 cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors"
             onClick={() => setShowGroomAccounts(!showGroomAccounts)}
           >
-            <h3 className="text-lg font-semibold text-gray-800">신랑측 계좌번호</h3>
+            <h3 className="text-lg font-semibold text-gray-800">
+              신랑측 계좌번호
+            </h3>
             <svg
-              className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${showGroomAccounts ? "scale-y-[-1]" : "scale-y-100"
-                }`}
+              className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${
+                showGroomAccounts ? 'scale-y-[-1]' : 'scale-y-100'
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
           {showGroomAccounts && (
@@ -719,8 +915,19 @@ function App() {
                   onClick={() => copyToClipboard('110-123-456789')}
                   className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center hover:bg-gray-300 transition-colors"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                    />
                   </svg>
                   복사
                 </button>
@@ -735,8 +942,19 @@ function App() {
                   onClick={() => copyToClipboard('110-123-456789')}
                   className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center hover:bg-gray-300 transition-colors"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                    />
                   </svg>
                   복사
                 </button>
@@ -751,18 +969,26 @@ function App() {
             className="flex justify-between items-center p-4 cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors"
             onClick={() => setShowBrideAccounts(!showBrideAccounts)}
           >
-            <h3 className="text-lg font-semibold text-gray-800">신부측 계좌번호</h3>
+            <h3 className="text-lg font-semibold text-gray-800">
+              신부측 계좌번호
+            </h3>
             <svg
-              className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${showBrideAccounts ? "scale-y-[-1]" : "scale-y-100"
-                }`}
+              className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${
+                showBrideAccounts ? 'scale-y-[-1]' : 'scale-y-100'
+              }`}
               style={{
-                transition: "transform 0.15s ease-out",
+                transition: 'transform 0.15s ease-out',
               }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
           {showBrideAccounts && (
@@ -777,8 +1003,19 @@ function App() {
                   onClick={() => copyToClipboard('987-654-321098')}
                   className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center hover:bg-gray-300 transition-colors"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                    />
                   </svg>
                   복사
                 </button>
@@ -788,71 +1025,376 @@ function App() {
         </div>
       </section>
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">GUEST BOOK</span>
+        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+          GUEST BOOK
+        </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">방명록</h2>
         {/* Write button */}
         <div className="max-w-md w-full">
-          <button onClick={openWrite} className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">글쓰기</button>
+          <button
+            onClick={openWrite}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            글쓰기
+          </button>
         </div>
         {/* Posts list */}
         <div className="w-full max-w-md space-y-3 mt-4">
           {posts.length === 0 && (
-            <div className="text-center text-gray-500">첫 번째 메시지를 남겨주세요!</div>
+            <div className="text-center text-gray-500">
+              첫 번째 메시지를 남겨주세요!
+            </div>
           )}
           {posts.map((p) => (
-            <article key={p.id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            <article
+              key={p.id}
+              className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+            >
               <div className="flex items-center justify-between">
-                <div className="text-base font-medium text-gray-900">{p.name || '익명'}</div>
-                <time className="text-xs text-gray-400" dateTime={p.createdAt}>{new Date(p.createdAt).toLocaleString()}</time>
+                <div className="text-base font-medium text-gray-900">
+                  {p.name || '익명'}
+                </div>
+                {/* <button
+                  onClick={() => openAuth('edit', p)}
+                  className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+                >
+                  수정
+                </button>
+                <button
+                  onClick={() => openAuth('delete', p)}
+                  className="text-xs px-2 py-1 rounded bg-rose-100 hover:bg-rose-200 text-rose-700"
+                >
+                  삭제
+                </button>
+                <time className="text-xs text-gray-400" dateTime={p.createdAt}>
+                  {new Date(p.createdAt).toLocaleString()}
+                </time>
               </div>
-              <p className="mt-2 text-gray-800 whitespace-pre-wrap">{p.content}</p>
+              <p className="mt-2 text-gray-800 whitespace-pre-wrap">
+                {p.content}
+              </p>
+            </article> */}
+                {p.pin && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openAuth('edit', p)}
+                      className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      aria-label="수정"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={() => openAuth('delete', p)}
+                      className="text-xs px-2 py-1 rounded bg-rose-100 hover:bg-rose-200 text-rose-700"
+                      aria-label="삭제"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Body: content */}
+              <p className="mt-2 text-gray-800 whitespace-pre-wrap">
+                {p.content}
+              </p>
+
+              {/* Footer: date bottom-right */}
+              <div className="mt-3 flex justify-end">
+                <time
+                  className="text-[11px] text-gray-400"
+                  dateTime={p.createdAt}
+                >
+                  {new Date(p.createdAt).toLocaleString()}
+                </time>
+              </div>
             </article>
           ))}
         </div>
-
-
       </section>
 
       {/* Write Modal (mobile sheet) */}
-      {
-        isWriteOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="absolute inset-0 bg-black/40" onClick={closeWrite} />
-            <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl ring-1 ring-black/5 max-h-[85vh] overflow-y-auto">
-              <form onSubmit={submitWrite} className="p-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">글쓰기</h3>
-                  <button type="button" onClick={closeWrite} aria-label="닫기" className="-m-1.5 p-1.5 rounded-md hover:bg-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-gray-600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
-                </div>
+      {isWriteOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40" onClick={closeWrite} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl ring-1 ring-black/5 max-h-[85vh] overflow-y-auto">
+            <form onSubmit={submitWrite} className="p-5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">글쓰기</h3>
+                <button
+                  type="button"
+                  onClick={closeWrite}
+                  aria-label="닫기"
+                  className="-m-1.5 p-1.5 rounded-md hover:bg-gray-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    className="w-5 h-5 text-gray-600"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
 
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">이름 <span className="text-red-500">*</span></label>
-                    <input type="text" value={gbName} onChange={(e) => setGbName(e.target.value)} placeholder="이름을 입력하세요" className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">비밀번호 <span className="text-red-500">*</span></label>
-                    <input type="password" value={gbPassword} onChange={(e) => setGbPassword(e.target.value)} placeholder="삭제/수정을 위한 비밀번호" className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500" autoComplete="new-password" inputMode="numeric" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">내용 <span className="text-red-500">*</span></label>
-                    <textarea value={gbContent} onChange={(e) => setGbContent(e.target.value)} placeholder="내용을 입력하세요" rows={6} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
+              <div className="mt-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    이름 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={gbName}
+                    onChange={(e) => setGbName(e.target.value)}
+                    placeholder="이름을 입력하세요"
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    비밀번호 <span className="text-red-500">*</span>
+                  </label>
+                  {/* <input type="password" value={gbPassword} onChange={(e) => setGbPassword(e.target.value)} placeholder="삭제/수정을 위한 비밀번호" className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500" autoComplete="new-password" inputMode="numeric" /> */}
+                  <input
+                    type="password"
+                    value={gbPassword}
+                    onChange={(e) => setGbPassword(digits4(e.target.value))}
+                    placeholder="1234 (숫자 4자리)"
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoComplete="new-password"
+                    inputMode="numeric"
+                    pattern="\d{4}"
+                    maxLength={4}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    내용 <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={gbContent}
+                    onChange={(e) => setGbContent(e.target.value)}
+                    placeholder="내용을 입력하세요"
+                    rows={6}
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
 
-                <div className="mt-5 grid grid-cols-2 gap-2">
-                  <button type="button" onClick={closeWrite} className="h-12 rounded-lg border border-gray-300 text-gray-700 bg-white active:scale-[0.99]">취소</button>
-                  <button type="submit" disabled={!canSubmit} className="h-12 rounded-lg bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99]">등록</button>
-                </div>
-              </form>
-            </div>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={closeWrite}
+                  className="h-12 rounded-lg border border-gray-300 text-gray-700 bg-white active:scale-[0.99]"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className="h-12 rounded-lg bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99]"
+                >
+                  등록
+                </button>
+              </div>
+            </form>
           </div>
-        )
-      }
-    </div >
-  )
+        </div>
+      )}
+      {isAuthOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40" onClick={closeAuth} />
+          <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-xl ring-1 ring-black/5 p-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">
+                비밀번호 확인
+              </h3>
+              <button
+                type="button"
+                onClick={closeAuth}
+                aria-label="닫기"
+                className="-m-1.5 p-1.5 rounded-md hover:bg-gray-100"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  className="w-5 h-5 text-gray-600"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!authPost || authPin !== authPost.pin) {
+                  setAuthError('비밀번호가 일치하지 않습니다.');
+                  return;
+                }
+                setIsAuthOpen(false);
+                if (authMode === 'delete') {
+                  setPosts((prev) => prev.filter((p) => p.id !== authPost.id));
+                } else if (authMode === 'edit') {
+                  setEditName(authPost.name || '');
+                  setEditContent(authPost.content || '');
+                  setIsEditOpen(true);
+                }
+              }}
+              className="mt-4 space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  4자리 비밀번호 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  value={authPin}
+                  onChange={(e) => {
+                    setAuthPin(digits4(e.target.value));
+                    setAuthError('');
+                  }}
+                  placeholder="숫자 4자리"
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  inputMode="numeric"
+                  pattern="\d{4}"
+                  maxLength={4}
+                />
+                {authError && (
+                  <p className="mt-2 text-sm text-red-600">{authError}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={closeAuth}
+                  className="h-12 rounded-lg border border-gray-300 text-gray-700 bg-white"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={!is4Digits(authPin)}
+                  className="h-12 rounded-lg bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  확인
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {isEditOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setIsEditOpen(false)}
+          />
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl ring-1 ring-black/5 max-h-[85vh] overflow-y-auto">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setPosts((prev) =>
+                  prev.map((p) =>
+                    p.id === authPost.id
+                      ? {
+                          ...p,
+                          name: editName.trim(),
+                          content: editContent.trim(),
+                        }
+                      : p
+                  )
+                );
+                setIsEditOpen(false);
+              }}
+              className="p-5"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">글 수정</h3>
+                <button
+                  type="button"
+                  onClick={() => setIsEditOpen(false)}
+                  aria-label="닫기"
+                  className="-m-1.5 p-1.5 rounded-md hover:bg-gray-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    className="w-5 h-5 text-gray-600"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    이름 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    내용 <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    rows={6}
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditOpen(false)}
+                  className="h-12 rounded-lg border border-gray-300 text-gray-700 bg-white"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="h-12 rounded-lg bg-blue-600 text-white font-medium"
+                >
+                  저장
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
