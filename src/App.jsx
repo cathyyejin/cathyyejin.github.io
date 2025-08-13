@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   const [currentImage, setCurrentImage] = useState(0);
@@ -165,7 +165,46 @@ function App() {
       createdAt: new Date().toISOString(),
       pin: '1234',
     },
+    {
+      id: 2,
+      name: '하객 A',
+      content: '두 분 행복하세요 ✨',
+      createdAt: new Date().toISOString(),
+      pin: '1234',
+    },
+    {
+      id: 3,
+      name: '하객 A',
+      content: '두 분 행복하세요 ✨',
+      createdAt: new Date().toISOString(),
+      pin: '1234',
+    },
+    {
+      id: 4,
+      name: '하객 A',
+      content: '두 분 행복하세요 ✨',
+      createdAt: new Date().toISOString(),
+      pin: '1234',
+    },
+    {
+      id: 5,
+      name: '하객 A',
+      content: '두 분 행복하세요 ✨',
+      createdAt: new Date().toISOString(),
+      pin: '1234',
+    },
+    {
+      id: 6,
+      name: '하객 A',
+      content: '두 분 행복하세요 ✨',
+      createdAt: new Date().toISOString(),
+      pin: '1234',
+    },
   ]);
+  const PAGE_SIZE = 5; // how many posts per page
+  const [page, setPage] = useState(1);
+  const [showAll, setShowAll] = useState(false);
+
   const [isWriteOpen, setIsWriteOpen] = useState(false);
   const [gbName, setGbName] = useState('');
   const [gbPassword, setGbPassword] = useState('');
@@ -180,6 +219,36 @@ function App() {
     setGbName('');
     setGbPassword('');
     setGbContent('');
+  };
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+  const start = (page - 1) * PAGE_SIZE;
+  const currentPagePosts = posts.slice(start, start + PAGE_SIZE);
+  const displayPosts = showAll ? posts : currentPagePosts;
+
+  const goTo = (n) => {
+    const next = Math.min(Math.max(1, n), totalPages);
+    setPage(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const getPages = (p, total) => {
+    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages = [1];
+    let left = Math.max(2, p - 1);
+    let right = Math.min(total - 1, p + 1);
+    if (p <= 3) {
+      left = 2;
+      right = 4;
+    }
+    if (p >= total - 2) {
+      left = total - 3;
+      right = total - 1;
+    }
+    if (left > 2) pages.push('…');
+    for (let i = left; i <= right; i++) pages.push(i);
+    if (right < total - 1) pages.push('…');
+    pages.push(total);
+    return pages;
   };
   // const submitWrite = (e) => {
   //   e.preventDefault()
@@ -228,6 +297,52 @@ function App() {
     setIsAuthOpen(false);
     setAuthPin('');
     setAuthError('');
+  };
+
+  // Copy current page URL
+  const copyPageLink = () => {
+    const url = window.location.href;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(url)
+        .then(() => alert('링크가 복사되었습니다.'))
+        .catch(() => {
+          // Fallback for older browsers
+          const i = document.createElement('input');
+          i.value = url;
+          document.body.appendChild(i);
+          i.select();
+          document.execCommand('copy');
+          document.body.removeChild(i);
+          alert('링크가 복사되었습니다.');
+        });
+    } else {
+      // Very old fallback
+      const i = document.createElement('input');
+      i.value = url;
+      document.body.appendChild(i);
+      i.select();
+      document.execCommand('copy');
+      document.body.removeChild(i);
+      alert('링크가 복사되었습니다.');
+    }
+  };
+
+  // Web Share API (falls back to copy)
+  const sharePage = async () => {
+    const url = window.location.href;
+    const title = '초대장';
+    const text = '초대장을 공유합니다.';
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch (err) {
+        // user cancelled = fine; other errors -> show message
+        if (err && err.name !== 'AbortError') alert('공유에 실패했습니다.');
+      }
+    } else {
+      copyPageLink(); // fallback if Web Share API is unavailable
+    }
   };
 
   return (
@@ -1045,14 +1160,14 @@ function App() {
               첫 번째 메시지를 남겨주세요!
             </div>
           )}
-          {posts.map((p) => (
+          {displayPosts.map((p) => (
             <article
               key={p.id}
               className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
             >
               <div className="flex items-center justify-between">
                 <div className="text-base font-medium text-gray-900">
-                  {p.name || '익명'}
+                  From {p.name || '익명'}
                 </div>
                 {/* <button
                   onClick={() => openAuth('edit', p)}
@@ -1110,6 +1225,107 @@ function App() {
               </div>
             </article>
           ))}
+        </div>
+        {/* Pagination */}
+        <div className="w-full max-w-md mt-4">
+          <div className="grid grid-cols-[auto,1fr,auto] items-center">
+            {/* Prev (left) */}
+            <div className="justify-self-start">
+              <button
+                type="button"
+                onClick={() => goTo(page - 1)}
+                disabled={page === 1 || showAll}
+                aria-label="이전 페이지"
+                className={`min-w-9 h-9 px-3 rounded-md text-sm ${
+                  page === 1 || showAll
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                }`}
+              >
+                ‹
+              </button>
+            </div>
+
+            {/* Numbers (center) */}
+            <div className="flex items-center justify-center gap-1">
+              {showAll ? (
+                <span className="text-sm text-gray-500">
+                  전체 {posts.length}개
+                </span>
+              ) : (
+                getPages(page, totalPages).map((tok, i) =>
+                  tok === '…' ? (
+                    <span
+                      key={`dots-${i}`}
+                      className="min-w-9 h-9 px-2 grid place-items-center text-sm text-gray-400"
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={tok}
+                      type="button"
+                      onClick={() => goTo(tok)}
+                      aria-current={tok === page ? 'page' : undefined}
+                      className={`min-w-9 h-9 px-3 rounded-md text-sm ${
+                        tok === page
+                          ? 'bg-gray-800 text-white'
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      {tok}
+                    </button>
+                  )
+                )
+              )}
+            </div>
+
+            {/* Next (right) */}
+            <div className="justify-self-end">
+              <button
+                type="button"
+                onClick={() => goTo(page + 1)}
+                disabled={page === totalPages || showAll}
+                aria-label="다음 페이지"
+                className={`min-w-9 h-9 px-3 rounded-md text-sm ${
+                  page === totalPages || showAll
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                }`}
+              >
+                ›
+              </button>
+            </div>
+          </div>
+
+          {/* 전체보기 toggle (below) */}
+          {/* <div className="max-w-md w-full mt-2 flex justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                const next = !showAll;
+                setShowAll(next);
+                if (!next) window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="h-9 px-3 rounded-md text-sm bg-gray-50 hover:bg-gray-100 text-gray-700"
+            >
+              {showAll ? '페이지 보기' : '전체보기'}
+            </button>
+          </div> */}
+        </div>
+        {/* Full-width 전체보기 */}
+        <div className="mt-2 max-w-md w-full">
+          <button
+            type="button"
+            onClick={() => {
+              const next = !showAll;
+              setShowAll(next);
+              if (!next) window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="w-full h-11 rounded-lg text-sm bg-gray-50 hover:bg-gray-100 text-gray-700"
+          >
+            {showAll ? '페이지 보기' : '전체보기'}
+          </button>
         </div>
       </section>
 
@@ -1393,6 +1609,67 @@ function App() {
           </div>
         </div>
       )}
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-2 mb-16">
+        {/* Share / Copy row */}
+        <div className="w-full max-w-2xl mx-auto mb-6">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={copyPageLink}
+              className="flex items-center justify-center gap-2 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 px-3 py-2"
+            >
+              {/* link icon */}
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 112.55 122.88"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M104.41,6.1c6.26,5.13,6.93,11.83,7.62,13.46l0.34,2.5c0.9,5.39-1.65,12.75-5.58,17.38L89.2,59.84 c-6.76,7.84-18.04,10.44-27.48,6.37l-0.03,0.04c3.45,5.63,3.15,9.64,3.46,10.57c0.9,5.41-1.65,12.74-5.58,17.38L41.97,114.6 c-8.53,9.89-23.58,11.1-33.53,2.61c-5.04-5.04-7.84-9.31-8.37-16.49c-0.47-6.24,1.53-12.37,5.59-17.18l17.92-20.79 c5.01-5.14,7.5-5.86,13.33-7.47l2.5-0.34l10.66,1.56c0.22,0.08,0.44,0.18,0.65,0.27l0.03-0.04c-5.35-8.71-4.57-20.11,2.14-27.97 L70.48,8.37c4.11-4.77,9.99-7.71,16.15-8.19c5.37-0.89,12.77,1.64,17.38,5.58L104.41,6.1L104.41,6.1z M74.23,51.71l-3.66,4.24 l0.64,0.01l0.02,0l0.6-0.02l0.01,0l0.14-0.01l0.02,0c2.11-0.16,4.19-0.88,5.96-2.14c0.34-0.24,0.68-0.51,1.02-0.82l0,0l0,0 c0.3-0.27,0.62-0.59,0.93-0.95l0,0l0.12-0.13l17.45-20.24c1.47-1.7,2.36-3.75,2.68-5.86c0.07-0.44,0.11-0.87,0.13-1.26 c0.02-0.41,0.01-0.85-0.01-1.28l0-0.05l-0.01-0.11c-0.16-2.11-0.88-4.19-2.14-5.96c-0.24-0.34-0.51-0.67-0.78-0.97l-0.03-0.04 c-0.29-0.32-0.61-0.64-0.94-0.94l0,0l-0.06-0.05l-0.05-0.05L96.16,15c-1.69-1.43-3.7-2.3-5.78-2.61l-0.03,0 c-0.43-0.06-0.85-0.11-1.24-0.12c-0.41-0.02-0.84-0.01-1.27,0.01l-0.07,0l-0.1,0.01c-2.11,0.16-4.19,0.88-5.96,2.14 c-0.34,0.24-0.68,0.51-0.98,0.78l-0.03,0.03c-0.33,0.29-0.64,0.61-0.94,0.95l0,0l-0.12,0.13L62.2,36.55 c-1.47,1.7-2.36,3.75-2.68,5.86h0c-0.06,0.43-0.11,0.86-0.12,1.26c-0.02,0.41-0.01,0.85,0.01,1.28l0.01,0.15l0,0.01v0.02 c0.03,0.46,0.09,0.91,0.18,1.37l3.58-4.15l0.1-0.12l0.13-0.14l0,0l0.02-0.02c1.29-1.39,3.02-2.18,4.79-2.3 c1.78-0.13,3.62,0.39,5.1,1.6l0,0l0.02,0.01l0.09,0.08l0.02,0.02l0.02,0.02l0.01,0.01l0.02,0.01l0.07,0.06l0,0l0,0 c2.06,1.83,2.82,4.6,2.21,7.13c-0.12,0.5-0.3,1-0.54,1.48c-0.22,0.46-0.51,0.9-0.83,1.31l-0.02,0.02l-0.03,0.04l0,0l-0.01,0.02 l-0.1,0.12l0,0L74.23,51.71L74.23,51.71z M40.06,80.23L40.06,80.23c2.33,2.01,5.88,1.75,7.89-0.58l5.58-6.47 c0.65,1.45,1.04,3,1.16,4.57c0.25,3.44-0.79,6.97-3.19,9.75l-17.46,20.24c-2.4,2.79-5.73,4.34-9.16,4.59 c-3.38,0.25-6.84-0.75-9.59-3.05l-0.16-0.14c-2.78-2.4-4.34-5.73-4.59-9.16c-0.25-3.4,0.76-6.89,3.1-9.65l0.09-0.1l17.25-20l0,0 l0,0l0.21-0.24c2.4-2.78,5.73-4.34,9.16-4.59c1.58-0.12,3.18,0.04,4.71,0.47l-5.58,6.47C37.47,74.67,37.73,78.22,40.06,80.23 L40.06,80.23z"
+                />
+              </svg>
+              링크 복사하기
+            </button>
+
+            <button
+              type="button"
+              onClick={sharePage}
+              className="flex items-center justify-center gap-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 px-3 py-2"
+            >
+              {/* share icon */}
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"
+                />
+                <path
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16 6l-4-4-4 4"
+                />
+                <path
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 2v14"
+                />
+              </svg>
+              공유하기
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
