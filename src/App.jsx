@@ -1,27 +1,37 @@
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 function App() {
   const [currentImage, setCurrentImage] = useState(0);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
   const [activeTab, setActiveTab] = useState('photo');
   const [showGroomAccounts, setShowGroomAccounts] = useState(false);
   const [showBrideAccounts, setShowBrideAccounts] = useState(false);
 
   // Sample images - replace with your actual images
   const images = [
-    'img/placeholder.png',
-    'img/placeholder.png',
-    'img/placeholder.png',
-    'img/placeholder.png',
-    'img/placeholder.png',
+    'img/cover.png',
+    'img/wedding1.jpg',
+    'img/wedding2.jpg',
+    'img/wedding3.png',
+    'img/wedding4.jpeg',
   ];
 
-  const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length);
+  const scrollerRef = useRef(null);
+
+  const scrollToIndex = (i) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
   };
 
-  const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  // keep currentImage in sync while the user scrolls
+  const onScrollSnap = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    if (idx !== currentImage) setCurrentImage(idx);
   };
 
   const IconSubway = (props) => (
@@ -299,6 +309,16 @@ function App() {
     setAuthError('');
   };
 
+  // 전체보기 팝업
+  const [isAllOpen, setIsAllOpen] = useState(false);
+  useEffect(() => {
+    if (!isAllOpen) return;
+    const onPop = () => setIsAllOpen(false);
+    window.history.pushState({ all: true }, '');
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [isAllOpen]);
+
   // Copy current page URL
   const copyPageLink = () => {
     const url = window.location.href;
@@ -348,27 +368,32 @@ function App() {
   return (
     <div className="w-full">
       {/* Full-Screen Banner */}
-      <section className="h-screen w-full bg-[url('/placeholder.jpg')] bg-cover bg-center relative overflow-hidden mb-16">
-        {/* Centered Title */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full text-white px-4 z-10">
-          <h1 className="text-4xl mb-2 drop-shadow-lg font-maruburi-bold">
-            김덕곤 & 구동민
-          </h1>
-        </div>
-        {/* Bottom Text Section */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-full text-center px-4 z-10">
-          <p className="text-lg mb-2 drop-shadow">
-            2026년 5월 16일 토요일 오후 3시
-          </p>
-          <p className="text-lg mb-2 drop-shadow">국립외교원</p>
-          {/* <div className="bg-white bg-opacity-80 text-gray-800 rounded-lg shadow-lg text-base inline-block px-4 py-2">
-            서울특별시 강남구 신사동 123-45
-          </div> */}
-        </div>
-        {/* Optional overlay for readability */}
-        <div className="absolute inset-0 bg-black bg-opacity-40" />
-      </section>
 
+      <section className="w-full mb-16">
+        {/* Centered container that matches the rest of your content width */}
+        <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
+          {/* Background image only inside the centered box */}
+          <div className="absolute inset-0 bg-[url('/img/cover.png')] bg-cover bg-center" />
+
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 bg-black/40" />
+
+          {/* Centered Title */}
+          <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-white z-10">
+            <h1 className="text-4xl mb-2 drop-shadow-lg font-maruburi-bold">
+              김덕곤 & 구동민
+            </h1>
+          </div>
+
+          {/* Bottom Text Section */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full px-4 text-center text-white z-10">
+            <p className="text-lg mb-2 drop-shadow">
+              2026년 5월 16일 토요일 오후 3시
+            </p>
+            <p className="text-lg mb-2 drop-shadow">국립외교원</p>
+          </div>
+        </div>
+      </section>
       {/* Scrollable Content Below Banner */}
 
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
@@ -498,59 +523,31 @@ function App() {
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">
           우리의 이야기
         </h2>
-
         {/* Carousel */}
         <div className="w-full max-w-2xl relative">
-          {/* Image */}
-          <div className="relative">
-            <img
-              src={images[currentImage]}
-              alt={`Gallery ${currentImage + 1}`}
-              className="w-full h-64 object-cover rounded-lg shadow-lg"
-            />
-
-            {/* Navigation Buttons */}
-            <button
-              onClick={prevImage}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-lg hover:bg-opacity-100 transition-all"
-            >
-              <svg
-                className="w-6 h-6 text-gray-800"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div
+            ref={scrollerRef}
+            onScroll={onScrollSnap}
+            className="hide-scrollbar flex overflow-x-auto snap-x snap-mandatory scroll-smooth shadow-lg bg-black"
+          >
+            {images.map((src, i) => (
+              <div
+                key={i}
+                className="relative min-w-full snap-center aspect-[4/5] max-h-[80vh] sm:aspect-[3/4] sm:max-h-[85vh]"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
+                {/* Fill the frame, crop as needed */}
+                <img
+                  src={src}
+                  alt={`Gallery ${i + 1}`}
+                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  draggable={false}
                 />
-              </svg>
-            </button>
-
-            <button
-              onClick={nextImage}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-lg hover:bg-opacity-100 transition-all"
-            >
-              <svg
-                className="w-6 h-6 text-gray-800"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+              </div>
+            ))}
           </div>
 
           {/* Dots */}
-          <div className="flex justify-center mt-4 space-x-2">
+          <div className="flex justify-center mt-4 space-x-2 mb-10">
             {images.map((_, index) => (
               <button
                 key={index}
@@ -1314,7 +1311,7 @@ function App() {
           </div> */}
         </div>
         {/* Full-width 전체보기 */}
-        <div className="mt-2 max-w-md w-full">
+        {/* <div className="mt-2 max-w-md w-full">
           <button
             type="button"
             onClick={() => {
@@ -1326,8 +1323,82 @@ function App() {
           >
             {showAll ? '페이지 보기' : '전체보기'}
           </button>
+        </div> */}
+        <div className="mt-2 w-full max-w-md mx-auto">
+          <button
+            type="button"
+            onClick={() => setIsAllOpen(true)}
+            className="w-full h-11 rounded-lg text-sm bg-gray-50 hover:bg-gray-100 text-gray-700"
+          >
+            모두 보기
+          </button>
         </div>
       </section>
+      {isGalleryOpen && (
+        <div className="fixed inset-0 z-50">
+          {/* Dim background (tap to close) */}
+          <div
+            className="absolute inset-0 bg-black/90"
+            onClick={() => setIsGalleryOpen(false)}
+          />
+
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col">
+            {/* Top bar */}
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+              <button
+                onClick={() => setIsGalleryOpen(false)}
+                aria-label="닫기"
+                className="p-2 rounded-md bg-white/20 hover:bg-white/30 text-white"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Swipe scroller */}
+            <div
+              ref={scrollerRef}
+              onScroll={onScrollSnap}
+              className="hide-scrollbar flex h-full overflow-x-auto snap-x snap-mandatory scroll-smooth"
+            >
+              {images.map((src, i) => (
+                <div key={i} className="relative min-w-full h-full snap-center">
+                  <img
+                    src={src}
+                    alt={`Gallery ${i + 1}`}
+                    className={`absolute inset-0 w-full h-full ${fill ? 'object-cover' : 'object-contain'} object-center`}
+                    draggable={false}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Dots */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => scrollToIndex(i)}
+                  aria-label={`${i + 1}번 이미지로 이동`}
+                  className={`w-2.5 h-2.5 rounded-full ${i === currentImage ? 'bg-white' : 'bg-white/40'}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Write Modal (mobile sheet) */}
       {isWriteOpen && (
@@ -1609,6 +1680,142 @@ function App() {
           </div>
         </div>
       )}
+      {isAllOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          {/* 배경 */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setIsAllOpen(false)}
+          />
+          {/* 컨텐츠 */}
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl ring-1 ring-black/5 h-[85vh] flex flex-col">
+            {/* 헤더 (고정) */}
+            {/* <div className="sticky top-0 z-10 bg-white border-b border-gray-200 rounded-t-2xl px-5 py-3 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-gray-900">
+                축하 메세지
+              </h3>
+              <span className="text-xs text-gray-500">총 {posts.length}개</span>
+              <button
+                type="button"
+                onClick={() => setIsAllOpen(false)}
+                aria-label="닫기"
+                className="-m-1.5 p-1.5 rounded-md hover:bg-gray-100"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  className="w-5 h-5 text-gray-600"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div> */}
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-200 rounded-t-2xl px-5 py-3 grid grid-cols-[auto,1fr,auto] items-center">
+              {/* left spacer to balance the close button width */}
+              <span aria-hidden className="w-8 h-8 -m-1.5 p-1.5" />
+
+              {/* centered title */}
+              <h3 className="text-base font-semibold text-gray-900 text-center">
+                축하 메세지
+              </h3>
+
+              {/* close button aligned to the right, same classes as before */}
+              <button
+                type="button"
+                onClick={() => setIsAllOpen(false)}
+                aria-label="닫기"
+                className="-m-1.5 p-1.5 rounded-md hover:bg-gray-100 justify-self-end"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  className="w-5 h-5 text-gray-600"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* 리스트 (스크롤 영역) */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-3">
+              {posts.length === 0 && (
+                <div className="text-center text-gray-500">
+                  첫 번째 메시지를 남겨주세요!
+                </div>
+              )}
+
+              {posts.map((p) => (
+                <article
+                  key={p.id}
+                  className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+                >
+                  {/* 헤더: 이름 / 수정·삭제 */}
+                  <div className="flex items-start justify-between">
+                    <div className="text-base font-medium text-gray-900">
+                      {p.name || '익명'}
+                    </div>
+                    {p.pin && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => openAuth('edit', p)}
+                          className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+                        >
+                          수정
+                        </button>
+                        <button
+                          onClick={() => openAuth('delete', p)}
+                          className="text-xs px-2 py-1 rounded bg-rose-100 hover:bg-rose-200 text-rose-700"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 본문 */}
+                  <p className="mt-2 text-gray-800 whitespace-pre-wrap">
+                    {p.content}
+                  </p>
+
+                  {/* 하단: 날짜 우측 */}
+                  <div className="mt-3 flex justify-end">
+                    <time
+                      className="text-[11px] text-gray-400"
+                      dateTime={p.createdAt}
+                    >
+                      {new Date(p.createdAt).toLocaleString()}
+                    </time>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {/* 하단 버튼 */}
+            <div className="p-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => setIsAllOpen(false)}
+                className="w-full h-11 rounded-lg bg-gray-800 text-white hover:bg-gray-900"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-2 mb-16">
         {/* Share / Copy row */}
         <div className="w-full max-w-2xl mx-auto mb-6">
@@ -1668,6 +1875,13 @@ function App() {
               공유하기
             </button>
           </div>
+        </div>
+      </section>
+      <section>
+        <div className="w-full px-6 py-2 mb-2">
+          <p className="text-gray-600 text-center text-sm">
+            Copyright © 2025 Yejin Park. All rights reserved.
+          </p>
         </div>
       </section>
     </div>
