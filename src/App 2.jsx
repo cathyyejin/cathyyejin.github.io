@@ -92,96 +92,6 @@ function Toast({ open, message, type, onClose, position = 'bottom' }) {
   );
 }
 
-function loadKakao(appkey) {
-  return new Promise((resolve, reject) => {
-    if (window.kakao && window.kakao.maps) {
-      window.kakao.maps.load(() => resolve(window.kakao));
-      return;
-    }
-    const EXISTING = document.getElementById('kakao-map-sdk');
-    const onLoaded = () => window.kakao.maps.load(() => resolve(window.kakao));
-
-    if (EXISTING) {
-      EXISTING.addEventListener('load', onLoaded, { once: true });
-      return;
-    }
-
-    const s = document.createElement('script');
-    s.id = 'kakao-map-sdk';
-    s.async = true;
-    // services 라이브러리(지오코더) 사용
-    s.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false&libraries=services`;
-    s.onload = onLoaded;
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-}
-
-export function KakaoMap({
-  appkey,
-  // 둘 중 하나만 있으면 됩니다: lat/lng 또는 address
-  lat,
-  lng,
-  address,
-  title = '',
-  level = 3, // 지도 확대 레벨(작을수록 확대)
-  className = 'w-full h-64 sm:h-80 rounded-lg overflow-hidden',
-}) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!appkey) return;
-
-    let map, marker, info;
-    let mounted = true;
-
-    loadKakao(appkey).then((kakao) => {
-      if (!mounted || !ref.current) return;
-
-      const center = new kakao.maps.LatLng(lat || 37.5665, lng || 126.978); // 기본: 서울시청
-      map = new kakao.maps.Map(ref.current, { center, level });
-
-      // 컨트롤(줌) 추가
-      const zoomControl = new kakao.maps.ZoomControl();
-      map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
-
-      const setMarkerWithInfo = (pos) => {
-        marker = new kakao.maps.Marker({ position: pos, map });
-        if (title) {
-          info = new kakao.maps.InfoWindow({
-            content: `<div style="padding:6px 8px;white-space:nowrap;">${title}</div>`,
-          });
-          info.open(map, marker);
-        }
-      };
-
-      if (address) {
-        const geocoder = new kakao.maps.services.Geocoder();
-        geocoder.addressSearch(address, (result, status) => {
-          if (!mounted) return;
-          if (status === kakao.maps.services.Status.OK && result[0]) {
-            const pos = new kakao.maps.LatLng(result[0].y, result[0].x);
-            map.setCenter(pos);
-            setMarkerWithInfo(pos);
-          } else {
-            // 주소 실패 시 기본 좌표 사용
-            setMarkerWithInfo(center);
-            // console.warn('주소를 좌표로 변환하지 못했습니다.');
-          }
-        });
-      } else if (lat && lng) {
-        setMarkerWithInfo(center);
-      }
-    });
-
-    return () => {
-      mounted = false;
-    };
-  }, [appkey, lat, lng, address, title, level]);
-
-  return <div ref={ref} className={className} />;
-}
-
 function App() {
   const [currentImage, setCurrentImage] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -190,7 +100,7 @@ function App() {
   const [showGroomAccounts, setShowGroomAccounts] = useState(false);
   const [showBrideAccounts, setShowBrideAccounts] = useState(false);
 
-  // 토스트
+  // 토스트(하단 팝업) 상태
   const [toast, setToast] = useState({
     open: false,
     message: '',
@@ -238,233 +148,81 @@ function App() {
   };
 
   const IconSubway = (props) => (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
-      <path d="M16.25,3 C18.3210678,3 20,4.67893219 20,6.75 L20,15.75 C20,17.525252 18.7664279,19.0123878 17.1096977,19.4009933 L19.5724502,20.5728546 C19.9464273,20.7509389 20.1052297,21.1984731 19.9271454,21.5724502 C19.7639014,21.9152625 19.3742447,22.0772684 19.022378,21.9647184 L18.9275498,21.9271454 L13.8298251,19.5 L10.1688251,19.5 L5.07245019,21.9271454 C4.69847311,22.1052297 4.25093893,21.9464273 4.07285461,21.5724502 C3.89477029,21.1984731 4.05357274,20.7509389 4.42754981,20.5728546 L6.8898721,19.4008924 C5.23335859,19.0121304 4,17.5250984 4,15.75 L4,6.75 C4,4.67893219 5.67893219,3 7.75,3 L16.25,3 Z M18.4998251,14 L5.4998251,14 L5.5,15.75 C5.5,16.9926407 6.50735931,18 7.75,18 L16.25,18 C17.4926407,18 18.5,16.9926407 18.5,15.75 L18.4998251,14 Z M8,15 C8.55228475,15 9,15.4477153 9,16 C9,16.5522847 8.55228475,17 8,17 C7.44771525,17 7,16.5522847 7,16 C7,15.4477153 7.44771525,15 8,15 Z M16,15 C16.5522847,15 17,15.4477153 17,16 C17,16.5522847 16.5522847,17 16,17 C15.4477153,17 15,16.5522847 15,16 C15,15.4477153 15.4477153,15 16,15 Z M16.25,4.5 L7.75,4.5 C6.50735931,4.5 5.5,5.50735931 5.5,6.75 L5.4998251,12.5 L18.4998251,12.5 L18.5,6.75 C18.5,5.50735931 17.4926407,4.5 16.25,4.5 Z M13.25,6 C13.6642136,6 14,6.33578644 14,6.75 C14,7.16421356 13.6642136,7.5 13.25,7.5 L10.75,7.5 C10.3357864,7.5 10,7.16421356 10,6.75 C10,6.33578644 10.3357864,6 10.75,6 L13.25,6 Z" />
+    <svg
+      viewBox="0 0 92.81 122.88"
+      fill="currentColor"
+      aria-hidden="true"
+      {...props}
+    >
+      <path
+        fillRule="evenodd"
+        d="M66.69,101.35H26.68l-4.7,6.94h49.24L66.69,101.35L66.69,101.35z M17.56,114.81l-5.47,8.07H0l19.64-29.46 h-3.49c-4.76,0-8.66-3.9-8.66-8.66V8.66C7.5,3.9,11.39,0,16.15,0h61.22c4.76,0,8.66,3.9,8.66,8.66v76.1c0,4.76-3.9,8.66-8.66,8.66 h-3.4l18.83,29.04H80.45l-4.99-7.65H17.56L17.56,114.81z M62.97,67.66h10.48c1.14,0,2.07,0.93,2.07,2.07V80.2 c0,1.14-0.93,2.07-2.07,2.07H62.97c-1.14,0-2.07-0.93-2.07-2.07V69.72C60.9,68.59,61.83,67.66,62.97,67.66L62.97,67.66z M18.98,67.66h10.48c1.14,0,2.07,0.93,2.07,2.07V80.2c0,1.14-0.93,2.07-2.07,2.07H18.98c-1.14,0-2.07-0.93-2.07-2.07V69.72 C16.91,68.59,17.84,67.66,18.98,67.66L18.98,67.66z M25.1,16.7h42.81c4.6,0,8.36,3.76,8.36,8.37v13.17c0,4.6-3.76,8.36-8.36,8.36 H25.1c-4.6,0-8.36-3.76-8.36-8.36V25.07C16.74,20.47,20.5,16.7,25.1,16.7L25.1,16.7z M38.33,3.8h16.2C55.34,3.8,56,4.46,56,5.27 v6.38c0,0.81-0.66,1.47-1.47,1.47h-16.2c-0.81,0-1.47-0.66-1.47-1.47V5.27C36.85,4.46,37.51,3.8,38.33,3.8L38.33,3.8z"
+      />
     </svg>
   );
 
   const IconBus = (props) => (
     <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
+      viewBox="0 0 122.88 120.96"
+      fill="currentColor"
       aria-hidden="true"
       {...props}
     >
-      {/* <path
-        d="M8.25 20.25V21.75C8.25 22.1478 8.09196 22.5293 7.81066 22.8106C7.52936 23.0919 7.14782 23.25 6.75 23.25C6.35218 23.25 5.97064 23.0919 5.68934 22.8106C5.40804 22.5293 5.25 22.1478 5.25 21.75V20.3651"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
       <path
-        d="M15.75 20.25V21.75C15.75 22.1478 15.908 22.5293 16.1893 22.8106C16.4706 23.0919 16.8522 23.25 17.25 23.25C17.6478 23.25 18.0294 23.0919 18.3107 22.8106C18.592 22.5293 18.75 22.1478 18.75 21.75V20.25"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        fillRule="evenodd"
+        d="M105.5,104.64H99.44v9.53A6.81,6.81,0,0,1,92.65,121h-4a6.82,6.82,0,0,1-6.79-6.79v-9.53H40.82v9.53A6.82,6.82,0,0,1,34,121H30a6.81,6.81,0,0,1-6.78-6.79v-9.53H18.1c-3.54-.06-5.24-2-5.5-5.29V21.52c-2,.2-2.95.66-3.43,1.68V45.45H4.87A4.88,4.88,0,0,1,0,40.58V27.44a4.89,4.89,0,0,1,4.73-4.87c.41-3.82,2.06-4.93,8-5.21Q14,7.36,26.36,2.57C44.09-.68,77.73-1,96.52,2.57c8.28,3.19,12.8,8.12,13.62,14.79,6,.3,7.61,1.42,8,5.21a4.89,4.89,0,0,1,4.73,4.87V40.58A4.88,4.88,0,0,1,118,45.45h-4.3V23.14c-.48-1-1.47-1.44-3.43-1.63V98.59c0,4.46-1.44,6-4.78,6ZM16.13,84.87l.28-6.69c.16-1.17.78-1.69,1.89-1.5A129.9,129.9,0,0,1,34.39,86.85c1.09.72.66,2.11-.78,1.85L18.48,87.6a2.74,2.74,0,0,1-2.35-2.73ZM52,93.45H71.3a.94.94,0,0,1,.94.94v3.24a.94.94,0,0,1-.94.94H52a.94.94,0,0,1-.94-.94V94.39a.94.94,0,0,1,.94-.94Zm50.35,0A2.51,2.51,0,1,1,99.82,96a2.51,2.51,0,0,1,2.5-2.51Zm-82.65,0A2.51,2.51,0,1,1,17.16,96a2.51,2.51,0,0,1,2.51-2.51Zm87.08-8.63-.28-6.69c-.16-1.17-.78-1.69-1.88-1.5a129.28,129.28,0,0,0-16.1,10.17c-1.09.72-.66,2.11.78,1.85l15.13-1.1a2.73,2.73,0,0,0,2.35-2.73ZM48.19,6.11h26.5a1.63,1.63,0,0,1,1.62,1.62V12a1.63,1.63,0,0,1-1.62,1.62H48.19A1.63,1.63,0,0,1,46.57,12V7.73a1.63,1.63,0,0,1,1.62-1.62ZM20.32,18.91H102.2a2,2,0,0,1,2,2V64.09c0,1.08-.89,1.69-2,2-28.09,8.53-53.8,8.18-81.88,0-1.11-.3-2-.9-2-2V20.89a2,2,0,0,1,2-2Z"
       />
-      <path
-        d="M0.75 9.75V6.75C0.75 6.35218 0.908035 5.97064 1.18934 5.68934C1.47064 5.40804 1.85218 5.25 2.25 5.25H3.60938"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M23.25 9.75V6.75C23.25 6.35218 23.092 5.97064 22.8107 5.68934C22.5294 5.40804 22.1478 5.25 21.75 5.25H20.375"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M18.25 0.75H5.75C4.64543 0.75 3.75 1.64543 3.75 2.75V18.25C3.75 19.3546 4.64543 20.25 5.75 20.25H18.25C19.3546 20.25 20.25 19.3546 20.25 18.25V2.75C20.25 1.64543 19.3546 0.75 18.25 0.75Z"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M20.25 14.25H3.75"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M14.25 17.25H17.25"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6.75 17.25H9.75"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.75 3.75H14.25"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      /> */}
-      <path
-        d="M4 10C4 6.22876 4 4.34315 5.17157 3.17157C6.34315 2 8.22876 2 12 2C15.7712 2 17.6569 2 18.8284 3.17157C20 4.34315 20 6.22876 20 10V12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34315 20 5.17157 18.8284C4 17.6569 4 15.7712 4 12V10Z"
-        stroke-width="1.5"
-      />
-      <path
-        d="M4 13H20"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M15.5 16H17"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M7 16H8.5"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M6 19.5V21C6 21.5523 6.44772 22 7 22H8.5C9.05228 22 9.5 21.5523 9.5 21V20"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M18 19.5V21C18 21.5523 17.5523 22 17 22H15.5C14.9477 22 14.5 21.5523 14.5 21V20"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M20 9H21C21.5523 9 22 9.44772 22 10V11C22 11.3148 21.8518 11.6111 21.6 11.8L20 13"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M4 9H3C2.44772 9 2 9.44772 2 10V11C2 11.3148 2.14819 11.6111 2.4 11.8L4 13"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <path d="M19.5 5H4.5" stroke-width="1.5" stroke-linecap="round" />
     </svg>
   );
 
   const IconCar = (props) => (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+    <svg
+      viewBox="0 0 122.88 103.26"
+      fill="currentColor"
+      aria-hidden="true"
+      {...props}
+    >
       <path
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M3 8L5.72187 10.2682C5.90158 10.418 6.12811 10.5 6.36205 10.5H17.6379C17.8719 10.5 18.0984 10.418 18.2781 10.2682L21 8M6.5 14H6.51M17.5 14H17.51M8.16065 4.5H15.8394C16.5571 4.5 17.2198 4.88457 17.5758 5.50772L20.473 10.5777C20.8183 11.1821 21 11.8661 21 12.5623V18.5C21 19.0523 20.5523 19.5 20 19.5H19C18.4477 19.5 18 19.0523 18 18.5V17.5H6V18.5C6 19.0523 5.55228 19.5 5 19.5H4C3.44772 19.5 3 19.0523 3 18.5V12.5623C3 11.8661 3.18166 11.1821 3.52703 10.5777L6.42416 5.50772C6.78024 4.88457 7.44293 4.5 8.16065 4.5ZM7 14C7 14.2761 6.77614 14.5 6.5 14.5C6.22386 14.5 6 14.2761 6 14C6 13.7239 6.22386 13.5 6.5 13.5C6.77614 13.5 7 13.7239 7 14ZM18 14C18 14.2761 17.7761 14.5 17.5 14.5C17.2239 14.5 17 14.2761 17 14C17 13.7239 17.2239 13.5 17.5 13.5C17.7761 13.5 18 13.7239 18 14Z"
+        fillRule="evenodd"
+        d="M117.95,42.04v61.22h-14.31V93.8h-84.4v9.46l-14.31,0V42.04H0v-9.41h12.04l6.71-20.88 C20.73,5.59,24.03,0,30.49,0h64.39c6.46,0,10.18,5.48,11.74,11.74l5.19,20.88h11.06v9.41H117.95L117.95,42.04L117.95,42.04z M40.01,74.91h42.27v9.97l-42.27,0V74.91L40.01,74.91L40.01,74.91z M9.72,51.69c10.77,0.34,17.36,4.85,19.05,14.26H9.72V51.69 L9.72,51.69z M111.8,51.69c-10.77,0.34-17.36,4.85-19.05,14.26h19.05V51.69L111.8,51.69z M17.18,32.62h88.52l-3.79-17.51 c-1.04-4.8-4.03-8.95-8.95-8.95H31.74c-4.92,0-7.44,4.26-8.95,8.95L17.18,32.62L17.18,32.62L17.18,32.62z"
       />
     </svg>
   );
 
   const IconParking = (props) => (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
-      <path d="M5,22H19a3,3,0,0,0,3-3V5a3,3,0,0,0-3-3H5A3,3,0,0,0,2,5V19A3,3,0,0,0,5,22ZM4,5A1,1,0,0,1,5,4H19a1,1,0,0,1,1,1V19a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1ZM9,18a1,1,0,0,0,1-1V14h2a4,4,0,0,0,0-8H9A1,1,0,0,0,8,7V17A1,1,0,0,0,9,18ZM10,8h2a2,2,0,0,1,0,4H10Z" />
+    <svg
+      viewBox="0 0 122.88 122.88"
+      fill="currentColor"
+      aria-hidden="true"
+      {...props}
+    >
+      <path
+        fillRule="evenodd"
+        d="M61.44,0c33.93,0,61.44,27.51,61.44,61.44c0,33.93-27.51,61.44-61.44,61.44S0,95.37,0,61.44 C0,27.51,27.51,0,61.44,0L61.44,0z M43.91,38.89h25.34c5.52,0,9.65,1.31,12.4,3.94c2.74,2.63,4.12,6.37,4.12,11.22 c0,4.98-1.5,8.88-4.5,11.68c-3,2.81-7.58,4.21-13.72,4.21H59.2v18.25H43.91V38.89L43.91,38.89z M59.2,59.96h3.75 c2.96,0,5.04-0.52,6.23-1.54c1.19-1.02,1.79-2.33,1.79-3.92c0-1.55-0.52-2.86-1.56-3.94c-1.03-1.08-2.99-1.62-5.85-1.62H59.2V59.96 L59.2,59.96z M61.44,13.92c26.24,0,47.52,21.27,47.52,47.52s-21.27,47.52-47.52,47.52c-26.24,0-47.52-21.27-47.52-47.52 S35.2,13.92,61.44,13.92L61.44,13.92z M61.44,5.41c30.94,0,56.03,25.08,56.03,56.03s-25.08,56.03-56.03,56.03 S5.41,92.38,5.41,61.44S30.5,5.41,61.44,5.41L61.44,5.41z"
+      />
     </svg>
   );
 
-  const copyText = async (
-    text,
-    okMsg = '복사되었습니다.',
-    errMsg = '복사에 실패했습니다.'
-  ) => {
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        // fallback
+  const copyToClipboard = (text) => {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => showToast('계좌번호가 복사되었습니다', 'success'))
+        .catch(() => showToast('계좌번호 복사에 실패했습니다', 'error'));
+    } else {
+      // 구형 브라우저 대체
+      try {
         const i = document.createElement('input');
         i.value = text;
         document.body.appendChild(i);
         i.select();
         document.execCommand('copy');
         document.body.removeChild(i);
+        showToast('계좌번호가 복사되었습니다', 'success');
+      } catch {
+        showToast('계좌번호 복사에 실패했습니다 ', 'error');
       }
-      showToast(okMsg, 'success'); // << use your toast
-    } catch (e) {
-      console.error(e);
-      showToast(errMsg, 'error'); // << use your toast
     }
-  };
-  const copyAccount = (acct) =>
-    copyText(acct, '계좌번호가 복사되었습니다', '계좌번호 복사에 실패했습니다');
-  const copyPageLink = () =>
-    copyText(window.location.href, '링크가 복사되었습니다');
-  const copyAddress = (address) =>
-    copyText(address, '주소가 복사되었습니다', '주소 복사에 실패했습니다');
-
-  // Web Share API (falls back to copy)
-  const sharePage = async () => {
-    const url = window.location.href;
-    const title = '초대장';
-    const text = '초대장을 공유합니다.';
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, text, url });
-      } catch (err) {
-        // user cancelled = fine; other errors -> show message
-        if (err && err.name !== 'AbortError') alert('공유에 실패했습니다.');
-      }
-    } else {
-      copyPageLink(); // fallback if Web Share API is unavailable
-    }
-  };
-
-  useEffect(() => {
-    const key = import.meta.env.VITE_KAKAO_JS_KEY;
-    if (!key) return;
-    if (window.Kakao?.isInitialized?.()) return;
-
-    const existing = document.querySelector('script[data-kakao-sdk]');
-    if (!existing) {
-      const s = document.createElement('script');
-      s.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
-      s.async = true;
-      s.defer = true;
-      s.setAttribute('data-kakao-sdk', 'true');
-      s.onload = () => {
-        if (window.Kakao && !window.Kakao.isInitialized())
-          window.Kakao.init(key);
-      };
-      document.head.appendChild(s);
-    } else if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init(key);
-    }
-  }, []);
-
-  const shareKakao = () => {
-    const Kakao = window.Kakao;
-    const url = window.location.href;
-
-    if (!Kakao) {
-      // SDK가 없으면 기존 sharePage로 대체
-      return sharePage?.() ?? copyPageLink?.();
-    }
-    if (!Kakao.isInitialized()) Kakao.init(import.meta.env.VITE_KAKAO_JS_KEY);
-
-    Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
-        title: '초대장',
-        description: '초대장을 공유합니다.',
-        imageUrl: `${window.location.origin}/img/cover.png`, // https 공개 경로
-        link: { mobileWebUrl: url, webUrl: url },
-      },
-      buttons: [
-        { title: '자세히 보기', link: { mobileWebUrl: url, webUrl: url } },
-      ],
-    });
-    showToast?.('카카오톡으로 공유를 시작했어요!');
   };
 
   const renderTabContent = () => {
@@ -685,10 +443,57 @@ function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, [isAllOpen]);
 
+  // Copy current page URL
+  const copyPageLink = () => {
+    const url = window.location.href;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(url)
+        .then(() => alert('링크가 복사되었습니다.'))
+        .catch(() => {
+          // Fallback for older browsers
+          const i = document.createElement('input');
+          i.value = url;
+          document.body.appendChild(i);
+          i.select();
+          document.execCommand('copy');
+          document.body.removeChild(i);
+          alert('링크가 복사되었습니다.');
+        });
+    } else {
+      // Very old fallback
+      const i = document.createElement('input');
+      i.value = url;
+      document.body.appendChild(i);
+      i.select();
+      document.execCommand('copy');
+      document.body.removeChild(i);
+      alert('링크가 복사되었습니다.');
+    }
+  };
+
+  // Web Share API (falls back to copy)
+  const sharePage = async () => {
+    const url = window.location.href;
+    const title = '초대장';
+    const text = '초대장을 공유합니다.';
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch (err) {
+        // user cancelled = fine; other errors -> show message
+        if (err && err.name !== 'AbortError') alert('공유에 실패했습니다.');
+      }
+    } else {
+      copyPageLink(); // fallback if Web Share API is unavailable
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Full-Screen Banner */}
-      <section className="w-full">
+
+      <section className="w-full mb-16">
         {/* Centered container that matches the rest of your content width */}
         <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
           {/* Background image only inside the centered box */}
@@ -714,7 +519,8 @@ function App() {
         </div>
       </section>
       {/* Scrollable Content Below Banner */}
-      <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 pb-16 pt-36">
+
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         {/* INVITATION */}
         <span className="block text-lg text-gray-500 tracking-widest mb-2">
           INVITATION
@@ -831,8 +637,9 @@ function App() {
           </div>
         </div>
       </section>
+
       {/* Gallery Section */}
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         {/* Section Title */}
         <span className="block text-lg text-gray-500 tracking-widest mb-2">
           GALLERY
@@ -879,39 +686,18 @@ function App() {
       </section>
 
       {/* Location Section */}
-      <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 py-20">
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         {/* Section Title */}
         <span className="block text-lg text-gray-500 tracking-widest mb-2">
           LOCATION
         </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">오시는 길</h2>
 
-        <p className="mb-2">국립외교원</p>
-        <p className="mb-2 text-gray-600">서울 서초구 남부순환로 2572</p>
-        <p className="mb-2 text-gray-600">
-          <a href="tel:+821012345678">02) 3497-7600</a>
-        </p>
-        <div className="max-w-md mb-8">
-          <button
-            onClick={() => copyAddress('서울 서초구 남부순환로 2572')}
-            // className="w-full bg-cyan-500 text-white py-3 px-4 rounded-lg hover:bg-cyan-600 transition-colors"
-            className="w-full bg-white border border-gray-200 rounded-lg py-2 px-4 shadow-sm"
-          >
-            주소 복사하기
-          </button>
+        {/* Map Placeholder */}
+        <div className="w-full max-w-2xl bg-gray-200 rounded-lg h-64 mb-8 flex items-center justify-center">
+          <p className="text-gray-600">지도가 여기에 표시됩니다</p>
         </div>
 
-        {/* Map */}
-        <div className="w-full max-w-2xl mb-8">
-          <KakaoMap
-            appkey={import.meta.env.VITE_KAKAO_JS_KEY}
-            // 방법 A: 주소로 표시 (지오코딩)
-            address="서울 서초구 남부순환로 2572"
-            title="국립외교원"
-            level={4}
-            className="w-full h-64 sm:h-80 rounded-lg overflow-hidden"
-          />
-        </div>
         {/* Navigation Buttons */}
         {/* <div className="w-full max-w-2xl mx-auto flex flex-nowrap gap-2 mb-8">
           <a
@@ -943,10 +729,10 @@ function App() {
           </a>
         </div> */}
         {/* Navigation Buttons */}
-        <div className="w-full max-w-2xl mx-auto">
+        <div className="w-full max-w-2xl mx-auto mb-8">
           <div className="grid grid-cols-3 gap-2">
             <a
-              href="https://tmap.life/ab5faa4e"
+              href="https://tmap.co.kr"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-colors px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
@@ -988,351 +774,72 @@ function App() {
             </a>
           </div>
         </div>
-        <p class="px-2 py-6 text-sm">
-          *국립외교원은 외교센터와 다른 건물이오니 혼동하지 않으시기 바랍니다.
-        </p>
+
         {/* Detailed Directions */}
-        <div className="w-full max-w-2xl space-y-6 px-2">
+        <div className="w-full max-w-2xl space-y-6">
           {/* Bus Section */}
-          <div className="border-y border-gray-200 py-6">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 flex items-center justify-center mr-2">
-                <IconBus className="w-5 h-5 text-gray-400" />
-              </div>
-              <h3 className="font-semibold text-lg">버스</h3>
-            </div>
-            <div className="ml-2 space-y-2">
-              <p>서초구청 정류장 도보 1분</p>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-lime-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">마을:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">서초17, 서초21</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">간선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">405, 406</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">지선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">7212</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <p className="text-sm mr-3">광역:</p>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  9400, 9800, 1241, G9633
-                </p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-cyan-500 rounded-full mr-2"></span>
-                  <p className="text-sm mr-3">공항:</p>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">M5439</p>
-              </div>
-              <p className="!mt-8">양재역 정류장 도보 5분</p>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-lime-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">마을:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  서초08, 서초09, 서초18, 서초20
-                </p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">지선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">4432, 4435</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">광역:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  9100, 9200, 9201, 9300, M6405, M6462
-                </p>
-              </div>
-
-              <p className="!mt-8">
-                양재역.서초문화예술회관(중) 정류장 도보 8분
-              </p>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">간선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  341, 541, 452, 140, 421, 440, 441, 741, 470, 420, 402, 400
-                </p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">지선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">0411</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">광역:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  1101, 1005, 6001, 1151, 1550-1, 6004, 9408, 9404, 5100, 6002,
-                  5006, 9409, 5401, 9202, 1552, 3401, M6458, 6600, M4448, G5100,
-                  6004, M5438, M4434
-                </p>
-              </div>
-            </div>
-          </div>
-          {/* Subway Section */}
           <div className="border-b border-gray-200 pb-4">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 flex items-center justify-center mr-3">
-                <IconSubway className="w-5 h-5 text-gray-400" />
-              </div>
-              <h3 className="font-semibold text-lg">지하철</h3>
+            {/* <div className="flex items-center mb-3"> */}
+            <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mr-3">
+              <IconBus className="w-5 h-5 text-white" />
             </div>
-            <div className="ml-2 space-y-2">
-              <p>양재역 12번 출구 도보 5분</p>
-              <div className="flex items-center">
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">3호선</span>
-
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm">신분당선</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Car Section */}
-          <div className="border-b border-gray-200 pb-4">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 flex items-center justify-center mr-3">
-                <IconCar className="w-5 h-5 text-gray-400" />
-              </div>
-              <h3 className="font-semibold text-lg">자가용</h3>
-            </div>
-            <div className="ml-2 space-y-2">
-              <p>내비게이션 : "국립외교원" 검색</p>
-              <p>서울 서초구 남부순환로 2572</p>
-            </div>
-          </div>
-
-          {/* Parking Section */}
-          <div className="border-b border-gray-200 pb-4">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 flex items-center justify-center mr-3">
-                {/* <span className="text-white text-lg font-bold">P</span> */}
-                <IconParking className="w-5 h-5 text-gray-400" />
-              </div>
-              <h3 className="font-semibold text-lg">주차</h3>
-            </div>
-            <div className="ml-2 space-y-2">
-              <p>국립외교원 내 지상주차장</p>
-              <p>양가 혼주 카운터에서 주차 등록 후 출차</p>
-            </div>
-          </div>
-
-          <div className="border-b border-gray-200 pb-6">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 flex items-center justify-center mr-2">
-                <IconBus className="w-5 h-5 text-gray-400" />
-              </div>
-              <h3 className="font-semibold text-lg">버스</h3>
-            </div>
+            <h3 className="font-semibold text-lg">버스</h3>
+            {/* </div> */}
             <div className="ml-11 space-y-2">
               <p>서초구청 맞은편 정류장 하차 도보 4분</p>
-
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">간선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm flex-1 min-w-0 leading-6">
-                  341, 541, 452, 140, 421, 440, 441, 741, 470, 420, 402, 400
-                </p>
+              <div className="flex items-center">
+                <span className="w-3 h-3 bg-lime-500 rounded-full mr-2"></span>
+                <p className="text-sm">마을버스: 서초17, 서초21</p>
               </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">지선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm flex-1 min-w-0 leading-6">0411</p>
+              <div className="flex items-center">
+                <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                <p className="text-sm">간선버스: 405, 406</p>
               </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">광역:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm flex-1 min-w-0 leading-6">
-                  1101, 1005, 6001, 1151, 1550-1, 6004, 9408, 9404, 5100, 6002,
-                  5006, 9409, 5401, 9202, 1552, 3401, M6458, 6600, M4448, G5100,
-                  6004, M5438, M4434
-                </p>
+              <div className="flex items-center">
+                <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                <p className="text-sm">광역버스 : 1241</p>
               </div>
-            </div>
-          </div>
-          <div className="border-b border-gray-200 pb-4">
-            {/* 2열 그리드: [아이콘 고정폭, 내용] */}
-            <div className="grid grid-cols-[2rem,1fr] gap-x-3">
-              {/* 헤더: 아이콘+제목 한 줄 */}
-              <div className="col-span-2 flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mr-3">
-                  <IconBus className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="font-semibold text-lg">버스</h3>
+              <div className="flex items-center">
+                <span className="w-3 h-3 bg-cyan-500 rounded-full mr-2"></span>
+                <p className="text-sm">인천공항 : M5439</p>
               </div>
-
-              {/* 본문: 제목과 같은 왼쪽선에 맞춤 (2열부터 시작) */}
-              <div className="col-start-2 space-y-2">
-                <p>서초구청 맞은편 정류장 하차 도보 4분</p>
-
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-lime-500 rounded-full mr-2" />
-                  <p className="text-sm">마을: 서초17, 서초21</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2" />
-                  <p className="text-sm">간선: 405, 406</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2" />
-                  <p className="text-sm">광역: 1241</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-cyan-500 rounded-full mr-2" />
-                  <p className="text-sm">인천공항 : M5439</p>
-                </div>
-
-                <p>서초구청 앞 정류장 하차 도보 1분</p>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-lime-500 rounded-full mr-2" />
-                  <p className="text-sm">마을: 서초17, 서초21</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2" />
-                  <p className="text-sm">간선: 405, 406</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2" />
-                  <p className="text-sm">지선: 7212</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2" />
-                  <p className="text-sm">광역: 9400, 9800, 1241, G9633</p>
-                </div>
+              <p className="text-sm">서초구청 앞 정류장 하차 도보 1분</p>
+              <div className="flex items-center">
+                <span className="w-3 h-3 bg-lime-500 rounded-full mr-2"></span>
+                <p className="text-sm">마을버스: 서초17, 서초21</p>
+              </div>
+              <div className="flex items-center">
+                <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                <p className="text-sm">간선버스: 405, 406</p>
+              </div>
+              <div className="flex items-center">
+                <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                <p className="text-sm">지선버스 : 7212</p>
+              </div>
+              <div className="flex items-center">
+                <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                <p className="text-sm">광역버스 : 9400, 9800, 1241, G9633</p>
               </div>
             </div>
           </div>
-
           {/* Subway Section */}
           <div className="border-b border-gray-200 pb-4">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mr-3">
+                {/* <span className="text-white text-lg">🚇</span> */}
                 <IconSubway className="w-5 h-5 text-white" />
+                {/* <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.5 2C2.5 1.17157 3.17157 0.5 4 0.5H14C14.8284 0.5 15.5 1.17157 15.5 2V15.5H2.5V2Z" />
+                </svg> */}
               </div>
               <h3 className="font-semibold text-lg">지하철</h3>
             </div>
             <div className="ml-11 space-y-2">
-              <div className="flex items-start gap-2">
-                {/* left: dots + line names (never wrap) */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">3호선</span>
-
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm leading-6">신분당선</span>
-                </div>
-
-                {/* right: only this part can wrap */}
-                <p className="text-sm ml-2 flex-1 min-w-0 leading-6">
-                  양재역 12번 출구 도보 5분
-                </p>
-              </div>
-            </div>
-
-            <div className="ml-11 space-y-2">
-              <div className="flex items-start flex-wrap gap-2">
-                {/* pairs: two lines on mobile, inline from sm+ */}
-                <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap items-right gap-x-3 gap-y-1 whitespace-nowrap shrink-0">
-                  {/* pair 1 */}
-                  <span className="inline-flex items-center whitespace-nowrap">
-                    <span className="inline-block w-3 h-3 bg-orange-500 rounded-full mr-2" />
-                    <span className="text-sm leading-6">3호선</span>
-                  </span>
-
-                  {/* pair 2 */}
-                  <span className="inline-flex items-center whitespace-nowrap">
-                    <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-2" />
-                    <span className="text-sm leading-6">신분당선</span>
-                  </span>
-                </div>
-
-                {/* tail: below on mobile, to the right from sm+; only this wraps */}
-                <p className="text-sm leading-6 flex-1 min-w-0 w-full sm:w-auto sm:ml-2">
-                  양재역 12번 출구 도보 5분
-                </p>
-              </div>
-            </div>
-            <div className="ml-11 space-y-2">
-              <div className="flex items-start">
-                {/* left: dots + line names (never wrap) */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">3호선</span>
-
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm leading-6">신분당선</span>
-                </div>
-              </div>
-              <div className="flex items-center whitespace-nowrap">
-                {/* right: only this part can wrap */}
-                <p className="text-sm flex-1 min-w-0 leading-6">
-                  양재역 12번 출구 도보 5분
+              <div className="flex items-center">
+                <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+                <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                <p className="text-sm">
+                  3호선 신분당선 양재역 12번 출구 도보 5분
                 </p>
               </div>
             </div>
@@ -1375,8 +882,9 @@ function App() {
           </div>
         </div>
       </section>
+
       {/* Information Section */}
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         {/* Section Title */}
         <span className="block text-lg text-gray-500 tracking-widest mb-2">
           INFORMATION
@@ -1488,7 +996,8 @@ function App() {
         {/* Tab Content */}
         {renderTabContent()}
       </section>
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
+
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         <span className="block text-lg text-gray-500 tracking-widest mb-2">
           ACCOUNT
         </span>
@@ -1501,7 +1010,9 @@ function App() {
             className="flex justify-between items-center p-4 cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors"
             onClick={() => setShowGroomAccounts(!showGroomAccounts)}
           >
-            <h3 className="font-semibold text-gray-800">신랑측 계좌번호</h3>
+            <h3 className="text-lg font-semibold text-gray-800">
+              신랑측 계좌번호
+            </h3>
             <svg
               className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${
                 showGroomAccounts ? 'scale-y-[-1]' : 'scale-y-100'
@@ -1527,7 +1038,7 @@ function App() {
                   <p className="text-gray-600 text-sm">최재만</p>
                 </div>
                 <button
-                  onClick={() => copyAccount('110-123-456789')}
+                  onClick={() => copyToClipboard('110-123-456789')}
                   className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center hover:bg-gray-300 transition-colors"
                 >
                   <svg
@@ -1554,7 +1065,7 @@ function App() {
                   <p className="text-gray-600 text-sm">최도현</p>
                 </div>
                 <button
-                  onClick={() => copyAccount('110-123-456789')}
+                  onClick={() => copyToClipboard('110-123-456789')}
                   className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center hover:bg-gray-300 transition-colors"
                 >
                   <svg
@@ -1565,20 +1076,10 @@ function App() {
                     stroke="currentColor"
                   >
                     <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
-                      stroke="#000000"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <path
-                      d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
-                      stroke="#000000"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
                     />
                   </svg>
                   복사
@@ -1594,7 +1095,9 @@ function App() {
             className="flex justify-between items-center p-4 cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors"
             onClick={() => setShowBrideAccounts(!showBrideAccounts)}
           >
-            <h3 className="font-semibold text-gray-800">신부측 계좌번호</h3>
+            <h3 className="text-lg font-semibold text-gray-800">
+              신부측 계좌번호
+            </h3>
             <svg
               className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${
                 showBrideAccounts ? 'scale-y-[-1]' : 'scale-y-100'
@@ -1623,20 +1126,21 @@ function App() {
                   <p className="text-gray-600 text-sm">김신부</p>
                 </div>
                 <button
-                  onClick={() => copyAccount('987-654-321098')}
+                  onClick={() => copyToClipboard('987-654-321098')}
                   className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center hover:bg-gray-300 transition-colors"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-4 w-4 mr-1"
-                    fill="currentColor"
+                    fill="none"
                     viewBox="0 0 24 24"
-                    // stroke="currentColor"
+                    stroke="currentColor"
                   >
                     <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M15 1.25H10.9436C9.10583 1.24998 7.65019 1.24997 6.51098 1.40314C5.33856 1.56076 4.38961 1.89288 3.64124 2.64124C2.89288 3.38961 2.56076 4.33856 2.40314 5.51098C2.24997 6.65019 2.24998 8.10582 2.25 9.94357V16C2.25 17.8722 3.62205 19.424 5.41551 19.7047C5.55348 20.4687 5.81753 21.1208 6.34835 21.6517C6.95027 22.2536 7.70814 22.5125 8.60825 22.6335C9.47522 22.75 10.5775 22.75 11.9451 22.75H15.0549C16.4225 22.75 17.5248 22.75 18.3918 22.6335C19.2919 22.5125 20.0497 22.2536 20.6517 21.6517C21.2536 21.0497 21.5125 20.2919 21.6335 19.3918C21.75 18.5248 21.75 17.4225 21.75 16.0549V10.9451C21.75 9.57754 21.75 8.47522 21.6335 7.60825C21.5125 6.70814 21.2536 5.95027 20.6517 5.34835C20.1208 4.81753 19.4687 4.55348 18.7047 4.41551C18.424 2.62205 16.8722 1.25 15 1.25ZM17.1293 4.27117C16.8265 3.38623 15.9876 2.75 15 2.75H11C9.09318 2.75 7.73851 2.75159 6.71085 2.88976C5.70476 3.02502 5.12511 3.27869 4.7019 3.7019C4.27869 4.12511 4.02502 4.70476 3.88976 5.71085C3.75159 6.73851 3.75 8.09318 3.75 10V16C3.75 16.9876 4.38624 17.8265 5.27117 18.1293C5.24998 17.5194 5.24999 16.8297 5.25 16.0549V10.9451C5.24998 9.57754 5.24996 8.47522 5.36652 7.60825C5.48754 6.70814 5.74643 5.95027 6.34835 5.34835C6.95027 4.74643 7.70814 4.48754 8.60825 4.36652C9.47522 4.24996 10.5775 4.24998 11.9451 4.25H15.0549C15.8297 4.24999 16.5194 4.24998 17.1293 4.27117ZM7.40901 6.40901C7.68577 6.13225 8.07435 5.9518 8.80812 5.85315C9.56347 5.75159 10.5646 5.75 12 5.75H15C16.4354 5.75 17.4365 5.75159 18.1919 5.85315C18.9257 5.9518 19.3142 6.13225 19.591 6.40901C19.8678 6.68577 20.0482 7.07435 20.1469 7.80812C20.2484 8.56347 20.25 9.56458 20.25 11V16C20.25 17.4354 20.2484 18.4365 20.1469 19.1919C20.0482 19.9257 19.8678 20.3142 19.591 20.591C19.3142 20.8678 18.9257 21.0482 18.1919 21.1469C17.4365 21.2484 16.4354 21.25 15 21.25H12C10.5646 21.25 9.56347 21.2484 8.80812 21.1469C8.07435 21.0482 7.68577 20.8678 7.40901 20.591C7.13225 20.3142 6.9518 19.9257 6.85315 19.1919C6.75159 18.4365 6.75 17.4354 6.75 16V11C6.75 9.56458 6.75159 8.56347 6.85315 7.80812C6.9518 7.07435 7.13225 6.68577 7.40901 6.40901Z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
                     />
                   </svg>
                   복사
@@ -1655,7 +1159,7 @@ function App() {
         <div className="max-w-md w-full">
           <button
             onClick={openWrite}
-            className="w-full bg-stone-600 text-white py-3 px-4 rounded-lg hover:bg-stone-700 transition-colors"
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
           >
             글쓰기
           </button>
@@ -1909,6 +1413,7 @@ function App() {
           </div>
         </div>
       )}
+
       {/* Write Modal (mobile sheet) */}
       {isWriteOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -2324,6 +1829,7 @@ function App() {
           </div>
         </div>
       )}
+
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-2 mb-16">
         {/* Share / Copy row */}
         <div className="w-full max-w-2xl mx-auto mb-6">
@@ -2331,7 +1837,7 @@ function App() {
             <button
               type="button"
               onClick={copyPageLink}
-              className="flex items-center justify-center gap-2 bg-gray-50 text-gray-700 text-sm rounded-md hover:bg-gray-100 px-3 py-3"
+              className="flex items-center justify-center gap-2 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 px-3 py-3"
             >
               {/* link icon */}
               <svg
@@ -2351,18 +1857,36 @@ function App() {
 
             <button
               type="button"
-              onClick={shareKakao}
-              className="flex items-center justify-center gap-2 bg-[#FEE500] text-black text-sm rounded-md hover:brightness-95 px-3 py-3"
+              onClick={sharePage}
+              className="flex items-center justify-center gap-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 px-3 py-3"
             >
+              {/* share icon */}
               <svg
                 className="w-4 h-4"
                 viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
+                fill="none"
+                stroke="currentColor"
               >
-                <path d="M12 3C6.477 3 2 6.686 2 11c0 2.09 1.058 3.987 2.77 5.35-.09.86-.39 1.98-1.17 3.04-.12.17-.09.41.08.54.12.09.27.1.4.04 1.47-.69 2.66-1.51 3.52-2.19A13.8 13.8 0 0012 19c5.523 0 10-3.686 10-8s-4.477-8-10-8z" />
+                <path
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"
+                />
+                <path
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16 6l-4-4-4 4"
+                />
+                <path
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 2v14"
+                />
               </svg>
-              카카오톡 공유하기
+              공유하기
             </button>
           </div>
         </div>
