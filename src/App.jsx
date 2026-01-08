@@ -186,9 +186,15 @@ function App() {
   const [currentImage, setCurrentImage] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
-  const [activeTab, setActiveTab] = useState('photo');
+  const [activeTab, setActiveTab] = useState('meal');
   const [showGroomAccounts, setShowGroomAccounts] = useState(false);
   const [showBrideAccounts, setShowBrideAccounts] = useState(false);
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
 
   // 토스트
   const [toast, setToast] = useState({
@@ -212,13 +218,40 @@ function App() {
     return () => clearTimeout(toastTimerRef.current);
   }, []);
 
+  // Countdown to wedding day
+  useEffect(() => {
+    const target = new Date('2026-05-16T11:30:00+09:00'); // KST 기준 2026-05-16 11:"30"
+
+    const tick = () => {
+      const now = new Date();
+      const diff = Math.max(target.getTime() - now.getTime(), 0);
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(diff / (1000 * 60 * 60)) % 24;
+      const minutes = Math.floor(diff / (1000 * 60)) % 60;
+      const seconds = Math.floor(diff / 1000) % 60;
+
+      setCountdown({ days, hours, minutes, seconds });
+    };
+
+    tick(); // 초기 값 설정
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Sample images - replace with your actual images
   const images = [
-    'img/cover.png',
-    'img/wedding1.jpg',
-    'img/wedding2.jpg',
-    'img/wedding3.png',
-    'img/wedding4.jpeg',
+    'img/intro.jpg',
+    'img/gallery1.jpg',
+    'img/gallery2_thumbnail.jpg',
+    'img/gallery3.jpg',
+    'img/gallery4.jpg',
+    'img/gallery5.jpg',
+    'img/gallery6.jpg',
+    'img/gallery7.jpg',
+    'img/gallery8.jpg',
+    'img/gallery9.jpg',
+    'img/gallery10.jpg',
   ];
 
   const scrollerRef = useRef(null);
@@ -457,7 +490,7 @@ function App() {
       content: {
         title: '초대장',
         description: '초대장을 공유합니다.',
-        imageUrl: `${window.location.origin}/img/cover.png`, // https 공개 경로
+        imageUrl: `${window.location.origin}/img/intro.png`, // https 공개 경로
         link: { mobileWebUrl: url, webUrl: url },
       },
       buttons: [
@@ -469,23 +502,6 @@ function App() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'photo':
-        return (
-          <div className="w-full max-w-2xl bg-white p-6 rounded-lg shadow-md text-center">
-            <img
-              src="/img/placeholder.png"
-              alt="Photo Booth Camera"
-              className="mx-auto mb-6 max-w-full h-auto"
-              style={{ maxWidth: '300px' }}
-            />
-            <p className="text-gray-700 mb-2">포토부스가 설치될 예정입니다.</p>
-            <p className="text-gray-700 mb-2">귀한 발걸음 해주신 여러분의</p>
-            <p className="text-gray-700 mb-2">
-              환한 미소와 따뜻한 말씀 남겨주시면
-            </p>
-            <p className="text-gray-700">소중히 간직하도록 하겠습니다.</p>
-          </div>
-        );
       case 'meal':
         return (
           <div className="w-full max-w-2xl bg-white p-6 rounded-lg shadow-md text-center">
@@ -494,16 +510,24 @@ function App() {
                 식사 안내
               </h3>
               <p className="text-gray-700 mb-2">
-                예식 후 식사가 준비되어 있습니다.
+                식사는 결혼식 및 사진 촬영이 끝난 후{' '}
               </p>
-              <p className="text-gray-700 mb-2">맛있는 음식과 함께</p>
+              <p className="text-gray-700 mb-2">외교원 지하 1층에서</p>
+              <p className="text-gray-700 mb-2">뷔폐식으로 진행됩니다.</p>
+              <p className="text-gray-700 mb-2">부족함 없이 즐기실 수 있도록</p>
               <p className="text-gray-700 mb-2">
-                소중한 시간을 나누시기 바랍니다.
+                한식을 비롯해 중식, 양식, 일식등
+              </p>
+              <p className="text-gray-700 mb-2">
+                다양한 메뉴가 준비되어 있습니다.
               </p>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">식사 시간: 오후 6시 ~ 8시</p>
-              <p className="text-sm text-gray-600">위치: 2층 레스토랑</p>
+              <p className="text-sm text-gray-600">
+                *예식 참석 시 반드시 청첩장 <br />
+                (모바일 포함)을 제시해야만 <br />
+                출입이 가능합니다.
+              </p>
             </div>
           </div>
         );
@@ -515,11 +539,7 @@ function App() {
                 주차 안내
               </h3>
               <p className="text-gray-700 mb-2">
-                건물 내 지하 주차장을 이용하실 수 있습니다.
-              </p>
-              <p className="text-gray-700 mb-2">예식 참석자분들께는</p>
-              <p className="text-gray-700 mb-2">
-                무료 주차 서비스를 제공합니다.
+                국립외교원 내 무료 주차 이용 가능
               </p>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
@@ -581,6 +601,7 @@ function App() {
   const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
 
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const [isWriteOpen, setIsWriteOpen] = useState(false);
   const [gbName, setGbName] = useState('');
   const [gbPassword, setGbPassword] = useState('');
@@ -588,7 +609,52 @@ function App() {
   // const canSubmit = gbName.trim() && gbPassword.trim() && gbContent.trim()
   const canSubmit = gbName.trim() && is4Digits(gbPassword) && gbContent.trim();
 
+  const contactGroups = [
+    {
+      title: '신랑측 GROOM',
+      items: [
+        {
+          role: '신랑',
+          name: '김덕곤',
+          phone: '010-9190-4651',
+        },
+        {
+          role: '신랑 아버지',
+          name: '김기훈',
+          phone: '010-2345-6789',
+        },
+        {
+          role: '신랑 어머니',
+          name: '김순희',
+          phone: '010-3456-7890',
+        },
+      ],
+    },
+    {
+      title: '신부측 BRIDE',
+      items: [
+        {
+          role: '신부',
+          name: '구동민',
+          phone: '010-4669-0716',
+        },
+        {
+          role: '신부 아버지',
+          name: '구헌상',
+          phone: '010-8795-5476',
+        },
+        {
+          role: '신부 어머니',
+          name: '나은효',
+          phone: '010-4669-1429',
+        },
+      ],
+    },
+  ];
+
   // --- Guest book handlers ---
+  const openContact = () => setIsContactOpen(true);
+  const closeContact = () => setIsContactOpen(false);
   const openWrite = () => setIsWriteOpen(true);
   const closeWrite = () => {
     setIsWriteOpen(false);
@@ -692,23 +758,21 @@ function App() {
         {/* Centered container that matches the rest of your content width */}
         <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
           {/* Background image only inside the centered box */}
-          <div className="absolute inset-0 bg-[url('/img/cover.png')] bg-cover bg-center" />
+          <div className="absolute inset-0 bg-[url('/img/intro.jpg')] bg-cover bg-center" />
 
           {/* Dark overlay for readability */}
           <div className="absolute inset-0 bg-black/40" />
 
           {/* Centered Title */}
           <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-white z-10">
-            <h1 className="text-4xl mb-2 drop-shadow-lg font-maruburi-bold">
-              김덕곤 & 구동민
+            <h1 className="text-xl mb-2 drop-shadow-lg font-maruburi-bold">
+              DEOKGON & DONGMIN
             </h1>
           </div>
 
           {/* Bottom Text Section */}
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full px-4 text-center text-white z-10">
-            <p className="text-lg mb-2 drop-shadow">
-              2026년 5월 16일 토요일 오후 3시
-            </p>
+            <p className="text-lg mb-2 drop-shadow">2026년 5월 16일 오후 3시</p>
             <p className="text-lg mb-2 drop-shadow">국립외교원</p>
           </div>
         </div>
@@ -727,38 +791,62 @@ function App() {
 
         {/* Multiline Quote */}
         <div className="text-center text-base text-gray-700 mb-6 leading-relaxed whitespace-pre-line">
-          우리가 서로 뜨겁게
+          함께 있을 때 가장 나다운 모습이 되고,
           <br />
-          사랑한다는 것은
+          함께 있을 때 미래를 꿈꾸게 하는 사람을 만나
           <br />
-          그대는 나의 세상을
+          함께 맞는 여덟 번째 봄, 결혼합니다.
           <br />
-          나는 그대의 세상을
+          지금처럼 서로의 가장 친한 친구가 되어
           <br />
-          함께 짊어지고 새벽을 향해
+          예쁘고 행복하게 잘 살겠습니다.
           <br />
-          걸어가겠다는 것입니다.
+          <br />
+          저희의 새로운 시작을 따뜻한 마음으로
+          <br />
+          함께 축복해 주세요.
         </div>
 
         {/* Names and Family Info */}
         <div className="mb-6 text-center text-lg text-gray-900">
           <div className="mb-1">
-            성춘향 · 이몽룡 <span className="text-gray-600">의 아들</span>{' '}
+            김기훈 · 김순희 <span className="text-gray-600">의 아들</span>{' '}
             <span className="font-bold">덕곤</span>
           </div>
           <div>
-            성춘향 · 이몽룡 <span className="text-gray-600">의 딸</span>{' '}
+            구헌상 · 나은효 <span className="text-gray-600">의 딸</span>{' '}
             <span className="font-bold">동민</span>
           </div>
         </div>
+        <div className="max-w-md w-40">
+          <button
+            onClick={openContact}
+            className="w-full bg-stone-600 text-white py-3 px-4 rounded-lg hover:bg-stone-700 transition-colors"
+          >
+            연락하기
+          </button>
+        </div>
+      </section>
 
+      {/* Image */}
+      <section className="w-full">
+        {/* Centered container that matches the rest of your content width */}
+        <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
+          {/* Background image only inside the centered box */}
+          <div className="absolute inset-0 bg-[url('/img/cover2.jpg')] bg-cover bg-center" />
+        </div>
+      </section>
+
+      {/* Calendar */}
+      <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 pb-16 pt-36">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+          WEDDING DAY
+        </span>
         {/* Date and Time */}
         <div className="mb-6 text-center">
           <div className="text-lg text-gray-900 font-medium">2026.05.16</div>
           <div className="text-base text-gray-700">토요일 오후 3시</div>
         </div>
-
-        {/* Calendar */}
         <div className="w-full max-w-xs border-t border-b border-gray-400 py-4 mb-2">
           <div className="grid grid-cols-7 text-center text-gray-700 font-medium mb-2">
             <div>일</div>
@@ -830,6 +918,50 @@ function App() {
             <div className="h-8 flex items-center justify-center"></div>
           </div>
         </div>
+        {/* Countdown */}
+        <div className="w-full max-w-2xl mt-6 flex flex-col items-center gap-4">
+          <div className="grid grid-cols-4 gap-2 sm:gap-3 w-full">
+            <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                {countdown.days}
+              </div>
+              <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
+                DAYS
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                {countdown.hours.toString().padStart(2, '0')}
+              </div>
+              <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
+                HOURS
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                {countdown.minutes.toString().padStart(2, '0')}
+              </div>
+              <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
+                MINUTES
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                {countdown.seconds.toString().padStart(2, '0')}
+              </div>
+              <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
+                SECONDS
+              </div>
+            </div>
+          </div>
+          <div className="text-sm text-gray-600">
+            덕곤 ❤ 동민 결혼식이{' '}
+            <span className="font-semibold text-rose-500">
+              {countdown.days}
+            </span>
+            일 남았습니다
+          </div>
+        </div>
       </section>
       {/* Gallery Section */}
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
@@ -840,39 +972,27 @@ function App() {
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">
           우리의 이야기
         </h2>
-        {/* Carousel */}
-        <div className="w-full max-w-2xl relative">
-          <div
-            ref={scrollerRef}
-            onScroll={onScrollSnap}
-            className="hide-scrollbar flex overflow-x-auto snap-x snap-mandatory scroll-smooth shadow-lg bg-black"
-          >
-            {images.map((src, i) => (
-              <div
+        {/* Grid Gallery */}
+        <div className="w-full max-w-3xl">
+          <div className="grid grid-cols-3 gap-1 sm:gap-2">
+            {images.slice(0, 9).map((src, i) => (
+              <button
                 key={i}
-                className="relative min-w-full snap-center aspect-[4/5] max-h-[80vh] sm:aspect-[3/4] sm:max-h-[85vh]"
+                type="button"
+                onClick={() => {
+                  setCurrentImage(i);
+                  setIsGalleryOpen(true);
+                }}
+                className="group relative aspect-square w-full overflow-hidden bg-gray-200"
               >
-                {/* Fill the frame, crop as needed */}
                 <img
                   src={src}
                   alt={`Gallery ${i + 1}`}
-                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-200 group-hover:scale-105"
                   draggable={false}
                 />
-              </div>
-            ))}
-          </div>
-
-          {/* Dots */}
-          <div className="flex justify-center mt-4 space-x-2 mb-10">
-            {images.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentImage(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index === currentImage ? 'bg-gray-800' : 'bg-gray-300'
-                }`}
-              />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
             ))}
           </div>
         </div>
@@ -988,141 +1108,13 @@ function App() {
             </a>
           </div>
         </div>
-        <p class="px-2 py-6 text-sm">
+        <p className="px-2 py-6 text-sm">
           *국립외교원은 외교센터와 다른 건물이오니 혼동하지 않으시기 바랍니다.
         </p>
         {/* Detailed Directions */}
         <div className="w-full max-w-2xl space-y-6 px-2">
-          {/* Bus Section */}
-          <div className="border-y border-gray-200 py-6">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 flex items-center justify-center mr-2">
-                <IconBus className="w-5 h-5 text-gray-400" />
-              </div>
-              <h3 className="font-semibold text-lg">버스</h3>
-            </div>
-            <div className="ml-2 space-y-2">
-              <p>서초구청 정류장 도보 1분</p>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-lime-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">마을:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">서초17, 서초21</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">간선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">405, 406</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">지선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">7212</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <p className="text-sm mr-3">광역:</p>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  9400, 9800, 1241, G9633
-                </p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-cyan-500 rounded-full mr-2"></span>
-                  <p className="text-sm mr-3">공항:</p>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">M5439</p>
-              </div>
-              <p className="!mt-8">양재역 정류장 도보 5분</p>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-lime-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">마을:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  서초08, 서초09, 서초18, 서초20
-                </p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">지선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">4432, 4435</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">광역:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  9100, 9200, 9201, 9300, M6405, M6462
-                </p>
-              </div>
-
-              <p className="!mt-8">
-                양재역.서초문화예술회관(중) 정류장 도보 8분
-              </p>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">간선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  341, 541, 452, 140, 421, 440, 441, 741, 470, 420, 402, 400
-                </p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">지선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">0411</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3">광역:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm ml-2 flex-1 min-w-0">
-                  1101, 1005, 6001, 1151, 1550-1, 6004, 9408, 9404, 5100, 6002,
-                  5006, 9409, 5401, 9202, 1552, 3401, M6458, 6600, M4448, G5100,
-                  6004, M5438, M4434
-                </p>
-              </div>
-            </div>
-          </div>
           {/* Subway Section */}
-          <div className="border-b border-gray-200 pb-4">
+          <div className="border-y border-gray-200 py-6">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 flex items-center justify-center mr-3">
                 <IconSubway className="w-5 h-5 text-gray-400" />
@@ -1130,7 +1122,7 @@ function App() {
               <h3 className="font-semibold text-lg">지하철</h3>
             </div>
             <div className="ml-2 space-y-2">
-              <p>양재역 12번 출구 도보 5분</p>
+              <p>양재역 12번 출구 도보 3분</p>
               <div className="flex items-center">
                 <div className="flex items-center whitespace-nowrap">
                   <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
@@ -1142,6 +1134,37 @@ function App() {
               </div>
             </div>
           </div>
+          {/* Bus Section */}
+          <div className="border-b border-gray-200 pb-4">
+            <div className="flex items-center mb-3">
+              <div className="w-8 h-8 flex items-center justify-center mr-2">
+                <IconBus className="w-5 h-5 text-gray-400" />
+              </div>
+              <h3 className="font-semibold text-lg">버스</h3>
+            </div>
+            <div className="ml-2 space-y-2">
+              {/* <p>서초구청 정류장 도보 1분</p> */}
+              <div className="flex items-start">
+                {/* left: type */}
+                <div className="flex items-center whitespace-nowrap">
+                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                  <span className="text-sm mr-3">간선:</span>
+                </div>
+                {/* right: lines */}
+                <p className="text-sm ml-2 flex-1 min-w-0">400, 405A, 406</p>
+              </div>
+              <div className="flex items-start">
+                {/* left: type */}
+                <div className="flex items-center whitespace-nowrap">
+                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                  <span className="text-sm mr-3">마을:</span>
+                </div>
+                {/* right: lines */}
+                <p className="text-sm ml-2 flex-1 min-w-0">서초17, 서초21</p>
+              </div>
+            </div>
+          </div>
+
           {/* Car Section */}
           <div className="border-b border-gray-200 pb-4">
             <div className="flex items-center mb-3">
@@ -1170,209 +1193,6 @@ function App() {
               <p>양가 혼주 카운터에서 주차 등록 후 출차</p>
             </div>
           </div>
-
-          <div className="border-b border-gray-200 pb-6">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 flex items-center justify-center mr-2">
-                <IconBus className="w-5 h-5 text-gray-400" />
-              </div>
-              <h3 className="font-semibold text-lg">버스</h3>
-            </div>
-            <div className="ml-11 space-y-2">
-              <p>서초구청 맞은편 정류장 하차 도보 4분</p>
-
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">간선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm flex-1 min-w-0 leading-6">
-                  341, 541, 452, 140, 421, 440, 441, 741, 470, 420, 402, 400
-                </p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">지선:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm flex-1 min-w-0 leading-6">0411</p>
-              </div>
-              <div className="flex items-start">
-                {/* left: type */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">광역:</span>
-                </div>
-                {/* right: lines */}
-                <p className="text-sm flex-1 min-w-0 leading-6">
-                  1101, 1005, 6001, 1151, 1550-1, 6004, 9408, 9404, 5100, 6002,
-                  5006, 9409, 5401, 9202, 1552, 3401, M6458, 6600, M4448, G5100,
-                  6004, M5438, M4434
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="border-b border-gray-200 pb-4">
-            {/* 2열 그리드: [아이콘 고정폭, 내용] */}
-            <div className="grid grid-cols-[2rem,1fr] gap-x-3">
-              {/* 헤더: 아이콘+제목 한 줄 */}
-              <div className="col-span-2 flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mr-3">
-                  <IconBus className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="font-semibold text-lg">버스</h3>
-              </div>
-
-              {/* 본문: 제목과 같은 왼쪽선에 맞춤 (2열부터 시작) */}
-              <div className="col-start-2 space-y-2">
-                <p>서초구청 맞은편 정류장 하차 도보 4분</p>
-
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-lime-500 rounded-full mr-2" />
-                  <p className="text-sm">마을: 서초17, 서초21</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2" />
-                  <p className="text-sm">간선: 405, 406</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2" />
-                  <p className="text-sm">광역: 1241</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-cyan-500 rounded-full mr-2" />
-                  <p className="text-sm">인천공항 : M5439</p>
-                </div>
-
-                <p>서초구청 앞 정류장 하차 도보 1분</p>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-lime-500 rounded-full mr-2" />
-                  <p className="text-sm">마을: 서초17, 서초21</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-blue-500 rounded-full mr-2" />
-                  <p className="text-sm">간선: 405, 406</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-2" />
-                  <p className="text-sm">지선: 7212</p>
-                </div>
-                <div className="flex items-center">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2" />
-                  <p className="text-sm">광역: 9400, 9800, 1241, G9633</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Subway Section */}
-          <div className="border-b border-gray-200 pb-4">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mr-3">
-                <IconSubway className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="font-semibold text-lg">지하철</h3>
-            </div>
-            <div className="ml-11 space-y-2">
-              <div className="flex items-start gap-2">
-                {/* left: dots + line names (never wrap) */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">3호선</span>
-
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm leading-6">신분당선</span>
-                </div>
-
-                {/* right: only this part can wrap */}
-                <p className="text-sm ml-2 flex-1 min-w-0 leading-6">
-                  양재역 12번 출구 도보 5분
-                </p>
-              </div>
-            </div>
-
-            <div className="ml-11 space-y-2">
-              <div className="flex items-start flex-wrap gap-2">
-                {/* pairs: two lines on mobile, inline from sm+ */}
-                <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap items-right gap-x-3 gap-y-1 whitespace-nowrap shrink-0">
-                  {/* pair 1 */}
-                  <span className="inline-flex items-center whitespace-nowrap">
-                    <span className="inline-block w-3 h-3 bg-orange-500 rounded-full mr-2" />
-                    <span className="text-sm leading-6">3호선</span>
-                  </span>
-
-                  {/* pair 2 */}
-                  <span className="inline-flex items-center whitespace-nowrap">
-                    <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-2" />
-                    <span className="text-sm leading-6">신분당선</span>
-                  </span>
-                </div>
-
-                {/* tail: below on mobile, to the right from sm+; only this wraps */}
-                <p className="text-sm leading-6 flex-1 min-w-0 w-full sm:w-auto sm:ml-2">
-                  양재역 12번 출구 도보 5분
-                </p>
-              </div>
-            </div>
-            <div className="ml-11 space-y-2">
-              <div className="flex items-start">
-                {/* left: dots + line names (never wrap) */}
-                <div className="flex items-center whitespace-nowrap">
-                  <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
-                  <span className="text-sm mr-3 leading-6">3호선</span>
-
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                  <span className="text-sm leading-6">신분당선</span>
-                </div>
-              </div>
-              <div className="flex items-center whitespace-nowrap">
-                {/* right: only this part can wrap */}
-                <p className="text-sm flex-1 min-w-0 leading-6">
-                  양재역 12번 출구 도보 5분
-                </p>
-              </div>
-            </div>
-          </div>
-          {/* Car Section */}
-          <div className="border-b border-gray-200 pb-4">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mr-3">
-                {/* <span className="text-white text-lg">🚗</span> */}
-                <IconCar className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="font-semibold text-lg">자가용</h3>
-            </div>
-            <div className="ml-11 space-y-2">
-              <p>내비게이션 : "국립외교원" 검색</p>
-              <p>주소 검색 : "서울 서초구 남부순환로 2572" 검색</p>
-              <p>용산 방면 : 남산 2호 터널 통과→ 서울 신라호텔</p>
-              <p>강남 방면 : 동호대교 → 체육관 → 서울 신라호텔</p>
-              <p>분당 방면 : 한남대교 → 장충단길 → 서울 신라호텔</p>
-            </div>
-          </div>
-
-          {/* Parking Section */}
-          <div className="border-b border-gray-200 pb-4">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mr-3">
-                {/* <span className="text-white text-lg font-bold">P</span> */}
-                <IconParking className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="font-semibold text-lg">주차</h3>
-            </div>
-            <div className="ml-11 space-y-2">
-              <div className="bg-yellow-100 p-3 rounded">
-                <p className="font-medium">
-                  자가용 이용 시 무료 발레파킹, 무료주차 4시간
-                </p>
-              </div>
-              <p>양가 혼주 카운터에서 주차 등록 후 출차</p>
-            </div>
-          </div>
         </div>
       </section>
       {/* Information Section */}
@@ -1381,7 +1201,9 @@ function App() {
         <span className="block text-lg text-gray-500 tracking-widest mb-2">
           INFORMATION
         </span>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-8">안내사항</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-8">
+          예식정보 및 안내사항
+        </h2>
 
         {/* Tab Buttons
         <div className="flex space-x-2 mb-8">
@@ -1457,9 +1279,8 @@ function App() {
         </div> */}
         {/* Tab Tabs (Underline) */}
         <div className="w-full max-w-2xl mb-8">
-          <div className="grid grid-cols-3">
+          <div className="grid grid-cols-2">
             {[
-              { id: 'photo', label: '포토부스' },
               { id: 'meal', label: '식사' },
               { id: 'parking', label: '예식' },
             ].map((t) => {
@@ -1488,167 +1309,10 @@ function App() {
         {/* Tab Content */}
         {renderTabContent()}
       </section>
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">
-          ACCOUNT
-        </span>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-8">
-          마음 전하실 곳
-        </h2>
-        {/* Groom's Account Section */}
-        <div className="w-full max-w-md bg-gray-50 rounded-lg shadow-sm overflow-hidden mb-4">
-          <div
-            className="flex justify-between items-center p-4 cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors"
-            onClick={() => setShowGroomAccounts(!showGroomAccounts)}
-          >
-            <h3 className="font-semibold text-gray-800">신랑측 계좌번호</h3>
-            <svg
-              className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${
-                showGroomAccounts ? 'scale-y-[-1]' : 'scale-y-100'
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-          {showGroomAccounts && (
-            <div className="p-4 space-y-4">
-              {/* Groom Account 1 */}
-              <div className="flex items-center justify-between border-b pb-4 border-gray-200">
-                <div>
-                  <p className="text-gray-700">신한 | 110-123-456789</p>
-                  <p className="text-gray-600 text-sm">최재만</p>
-                </div>
-                <button
-                  onClick={() => copyAccount('110-123-456789')}
-                  className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center hover:bg-gray-300 transition-colors"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-                    />
-                  </svg>
-                  복사
-                </button>
-              </div>
-              {/* Groom Account 2 */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-700">신한 | 110-123-456789</p>
-                  <p className="text-gray-600 text-sm">최도현</p>
-                </div>
-                <button
-                  onClick={() => copyAccount('110-123-456789')}
-                  className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center hover:bg-gray-300 transition-colors"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
-                      stroke="#000000"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <path
-                      d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
-                      stroke="#000000"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                  복사
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Bride's Account Section */}
-        <div className="w-full max-w-md bg-gray-50 rounded-lg shadow-sm overflow-hidden">
-          <div
-            className="flex justify-between items-center p-4 cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors"
-            onClick={() => setShowBrideAccounts(!showBrideAccounts)}
-          >
-            <h3 className="font-semibold text-gray-800">신부측 계좌번호</h3>
-            <svg
-              className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${
-                showBrideAccounts ? 'scale-y-[-1]' : 'scale-y-100'
-              }`}
-              style={{
-                transition: 'transform 0.15s ease-out',
-              }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-          {showBrideAccounts && (
-            <div className="p-4 space-y-4">
-              {/* Bride Account 1 */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-700">국민 | 987-654-321098</p>
-                  <p className="text-gray-600 text-sm">김신부</p>
-                </div>
-                <button
-                  onClick={() => copyAccount('987-654-321098')}
-                  className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center hover:bg-gray-300 transition-colors"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-1"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    // stroke="currentColor"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M15 1.25H10.9436C9.10583 1.24998 7.65019 1.24997 6.51098 1.40314C5.33856 1.56076 4.38961 1.89288 3.64124 2.64124C2.89288 3.38961 2.56076 4.33856 2.40314 5.51098C2.24997 6.65019 2.24998 8.10582 2.25 9.94357V16C2.25 17.8722 3.62205 19.424 5.41551 19.7047C5.55348 20.4687 5.81753 21.1208 6.34835 21.6517C6.95027 22.2536 7.70814 22.5125 8.60825 22.6335C9.47522 22.75 10.5775 22.75 11.9451 22.75H15.0549C16.4225 22.75 17.5248 22.75 18.3918 22.6335C19.2919 22.5125 20.0497 22.2536 20.6517 21.6517C21.2536 21.0497 21.5125 20.2919 21.6335 19.3918C21.75 18.5248 21.75 17.4225 21.75 16.0549V10.9451C21.75 9.57754 21.75 8.47522 21.6335 7.60825C21.5125 6.70814 21.2536 5.95027 20.6517 5.34835C20.1208 4.81753 19.4687 4.55348 18.7047 4.41551C18.424 2.62205 16.8722 1.25 15 1.25ZM17.1293 4.27117C16.8265 3.38623 15.9876 2.75 15 2.75H11C9.09318 2.75 7.73851 2.75159 6.71085 2.88976C5.70476 3.02502 5.12511 3.27869 4.7019 3.7019C4.27869 4.12511 4.02502 4.70476 3.88976 5.71085C3.75159 6.73851 3.75 8.09318 3.75 10V16C3.75 16.9876 4.38624 17.8265 5.27117 18.1293C5.24998 17.5194 5.24999 16.8297 5.25 16.0549V10.9451C5.24998 9.57754 5.24996 8.47522 5.36652 7.60825C5.48754 6.70814 5.74643 5.95027 6.34835 5.34835C6.95027 4.74643 7.70814 4.48754 8.60825 4.36652C9.47522 4.24996 10.5775 4.24998 11.9451 4.25H15.0549C15.8297 4.24999 16.5194 4.24998 17.1293 4.27117ZM7.40901 6.40901C7.68577 6.13225 8.07435 5.9518 8.80812 5.85315C9.56347 5.75159 10.5646 5.75 12 5.75H15C16.4354 5.75 17.4365 5.75159 18.1919 5.85315C18.9257 5.9518 19.3142 6.13225 19.591 6.40901C19.8678 6.68577 20.0482 7.07435 20.1469 7.80812C20.2484 8.56347 20.25 9.56458 20.25 11V16C20.25 17.4354 20.2484 18.4365 20.1469 19.1919C20.0482 19.9257 19.8678 20.3142 19.591 20.591C19.3142 20.8678 18.9257 21.0482 18.1919 21.1469C17.4365 21.2484 16.4354 21.25 15 21.25H12C10.5646 21.25 9.56347 21.2484 8.80812 21.1469C8.07435 21.0482 7.68577 20.8678 7.40901 20.591C7.13225 20.3142 6.9518 19.9257 6.85315 19.1919C6.75159 18.4365 6.75 17.4354 6.75 16V11C6.75 9.56458 6.75159 8.56347 6.85315 7.80812C6.9518 7.07435 7.13225 6.68577 7.40901 6.40901Z"
-                    />
-                  </svg>
-                  복사
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
+      {/* Guest Book */}
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
         <span className="block text-lg text-gray-500 tracking-widest mb-2">
-          GUEST BOOK
+          MESSAGE
         </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">방명록</h2>
         {/* Write button */}
@@ -1844,6 +1508,360 @@ function App() {
           </button>
         </div>
       </section>
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+          ACCOUNT
+        </span>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+          마음 전하실 곳
+        </h2>
+        <p className="mb-2 py-6 text-sm text-center">
+          참석이 어려우신 분들을 위해 기재했습니다 <br /> 너그러운 마음으로 양해
+          부탁드립니다
+        </p>
+        {/* Groom's Account Section */}
+        <div className="w-full max-w-md bg-gray-50 rounded-lg shadow-sm overflow-hidden mb-4">
+          <div
+            className="flex justify-between items-center p-4 cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors"
+            onClick={() => setShowGroomAccounts(!showGroomAccounts)}
+          >
+            <h3 className="font-semibold text-gray-800">신랑측 계좌번호</h3>
+            <svg
+              className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${
+                showGroomAccounts ? 'scale-y-[-1]' : 'scale-y-100'
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+          {showGroomAccounts && (
+            <div className="p-4 space-y-4">
+              {/* Groom Account 1 */}
+              <div className="rounded-2xl bg-white shadow-sm p-4 space-y-3">
+                <div className="flex items-center justify-between text-sm text-gray-700">
+                  <span>신랑</span>
+                  <span className="font-medium">김덕곤</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
+                  <div className="text-sm text-gray-600">
+                    <div className="text-gray-500">신한은행</div>
+                    <div className="tracking-wide">368-06-704954</div>
+                  </div>
+                  <button
+                    onClick={() => copyAccount('987-654-321098')}
+                    className="flex items-center gap-1 text-sm text-gray-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <span>복사</span>
+                  </button>
+                </div>
+              </div>
+              {/* Groom Account 2 */}
+              <div className="rounded-2xl bg-white shadow-sm p-4 space-y-3">
+                <div className="flex items-center justify-between text-sm text-gray-700">
+                  <span>신랑 아버지</span>
+                  <span className="font-medium">김기훈</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
+                  <div className="text-sm text-gray-600">
+                    <div className="text-gray-500">신한은행</div>
+                    <div className="tracking-wide">368-06-704954</div>
+                  </div>
+                  <button
+                    onClick={() => copyAccount('987-654-321098')}
+                    className="flex items-center gap-1 text-sm text-gray-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <span>복사</span>
+                  </button>
+                </div>
+              </div>
+              {/* Groom Account 3 */}
+              <div className="rounded-2xl bg-white shadow-sm p-4 space-y-3">
+                <div className="flex items-center justify-between text-sm text-gray-700">
+                  <span>신랑 어머니</span>
+                  <span className="font-medium">김순희</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
+                  <div className="text-sm text-gray-600">
+                    <div className="text-gray-500">신한은행</div>
+                    <div className="tracking-wide">368-06-704954</div>
+                  </div>
+                  <button
+                    onClick={() => copyAccount('987-654-321098')}
+                    className="flex items-center gap-1 text-sm text-gray-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <span>복사</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bride's Account Section */}
+        <div className="w-full max-w-md bg-gray-50 rounded-lg shadow-sm overflow-hidden">
+          <div
+            className="flex justify-between items-center p-4 cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors"
+            onClick={() => setShowBrideAccounts(!showBrideAccounts)}
+          >
+            <h3 className="font-semibold text-gray-800">신부측 계좌번호</h3>
+            <svg
+              className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ease-in-out ${
+                showBrideAccounts ? 'scale-y-[-1]' : 'scale-y-100'
+              }`}
+              style={{
+                transition: 'transform 0.15s ease-out',
+              }}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+          {showBrideAccounts && (
+            <div className="p-4 space-y-4">
+              {/* Bride Account 1 (신부) */}
+              <div className="rounded-2xl bg-white shadow-sm p-4 space-y-3">
+                <div className="flex items-center justify-between text-sm text-gray-700">
+                  <span>신부</span>
+                  <span className="font-medium">구동민</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
+                  <div className="text-sm text-gray-600">
+                    <div className="text-gray-500">신한은행</div>
+                    <div className="tracking-wide">368-06-704954</div>
+                  </div>
+                  <button
+                    onClick={() => copyAccount('987-654-321098')}
+                    className="flex items-center gap-1 text-sm text-gray-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <span>복사</span>
+                  </button>
+                </div>
+              </div>
+              {/* Bride Account 2 (신부 아버지) */}
+              <div className="rounded-2xl bg-white shadow-sm p-4 space-y-3">
+                <div className="flex items-center justify-between text-sm text-gray-700">
+                  <span>신부 아버지</span>
+                  <span className="font-medium">구헌상</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
+                  <div className="text-sm text-gray-600">
+                    <div className="text-gray-500">신한은행</div>
+                    <div className="tracking-wide">368-06-704954</div>
+                  </div>
+                  <button
+                    onClick={() => copyAccount('987-654-321098')}
+                    className="flex items-center gap-1 text-sm text-gray-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <span>복사</span>
+                  </button>
+                </div>
+              </div>
+              {/* Bride Account 3 (신부 어머니) */}
+              <div className="rounded-2xl bg-white shadow-sm p-4 space-y-3">
+                <div className="flex items-center justify-between text-sm text-gray-700">
+                  <span>신부 어머니</span>
+                  <span className="font-medium">나은효</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
+                  <div className="text-sm text-gray-600">
+                    <div className="text-gray-500">신한은행</div>
+                    <div className="tracking-wide">368-06-704954</div>
+                  </div>
+                  <button
+                    onClick={() => copyAccount('987-654-321098')}
+                    className="flex items-center gap-1 text-sm text-gray-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                        stroke="#000000"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <span>복사</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Closing Image + Quote */}
+      <section className="w-full">
+        {/* Centered container that matches the rest of your content width */}
+        <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
+          {/* Background image only inside the centered box */}
+          <div className="absolute inset-0 bg-[url('/img/last.jpg')] bg-cover bg-center" />
+
+          {/* Bottom overlay with quote */}
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-neutral-900/90 via-neutral-900/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 pb-14 px-6 flex justify-center">
+            <div className="max-w-md text-center text-neutral-100 space-y-4">
+              <p className="text-sm sm:text-base leading-relaxed">
+                오늘이란 평범한 날이지만 <br /> 미래로 통하는 가장 소중한
+                시간이야
+              </p>
+              <p className="text-xs sm:text-sm text-neutral-300">
+                - 영화 &lsquo;업&rsquo; 중에서
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {isGalleryOpen && (
         <div className="fixed inset-0 z-50">
           {/* Dim background (tap to close) */}
@@ -1888,7 +1906,7 @@ function App() {
                   <img
                     src={src}
                     alt={`Gallery ${i + 1}`}
-                    className={`absolute inset-0 w-full h-full ${fill ? 'object-cover' : 'object-contain'} object-center`}
+                    className="absolute inset-0 w-full h-full object-contain object-center"
                     draggable={false}
                   />
                 </div>
@@ -1904,6 +1922,94 @@ function App() {
                   aria-label={`${i + 1}번 이미지로 이동`}
                   className={`w-2.5 h-2.5 rounded-full ${i === currentImage ? 'bg-white' : 'bg-white/40'}`}
                 />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {isContactOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            onClick={closeContact}
+          />
+          <div className="relative w-full max-w-md bg-gradient-to-b from-stone-900/95 via-stone-900/90 to-stone-800/90 text-white rounded-3xl shadow-2xl ring-1 ring-white/10 overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+              <div>
+                <div className="text-xs uppercase tracking-[0.3em] text-white/70">
+                  Contact
+                </div>
+                <div className="text-2xl font-semibold">연락하기</div>
+              </div>
+              <button
+                type="button"
+                onClick={closeContact}
+                aria-label="닫기"
+                className="p-2 rounded-full hover:bg-white/10 transition"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-7">
+              {contactGroups.map((group) => (
+                <div key={group.title} className="space-y-3">
+                  <div className="text-sm uppercase tracking-[0.25em] text-white/70">
+                    {group.title}
+                  </div>
+                  <div className="border-t border-white/15" />
+                  <div className="space-y-3">
+                    {group.items.map((item) => (
+                      <div
+                        key={item.role + item.name}
+                        className="flex items-center justify-between gap-4 rounded-2xl bg-white/5 px-4 py-3"
+                      >
+                        <div>
+                          <div className="text-sm text-white/80">
+                            {item.role}
+                          </div>
+                          <div className="text-lg font-semibold">
+                            {item.name}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`tel:${item.phone}`}
+                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
+                            aria-label={`${item.name}에게 전화하기`}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              className="w-5 h-5"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M3.5 5.5c0-1.1.9-2 2-2h1.3c.5 0 .9.3 1 .8l.8 3.1c.1.5 0 1-.4 1.4l-1 1c.8 1.6 2.1 2.9 3.7 3.7l1-1c.4-.4.9-.5 1.4-.4l3.1.8c.5.1.8.5.8 1v1.3c0 1.1-.9 2-2 2H16C9.9 18 6 14.1 6 8V7.5"
+                              />
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -2324,53 +2430,72 @@ function App() {
           </div>
         </div>
       )}
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-2 mb-16">
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-6 mb-16">
         {/* Share / Copy row */}
-        <div className="w-full max-w-2xl mx-auto mb-6">
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={copyPageLink}
-              className="flex items-center justify-center gap-2 bg-gray-50 text-gray-700 text-sm rounded-md hover:bg-gray-100 px-3 py-3"
-            >
-              {/* link icon */}
+        <div className="w-full max-w-md mx-auto space-y-3">
+          {/* Kakao share button */}
+          <button
+            type="button"
+            onClick={shareKakao}
+            className="w-full flex items-center justify-between px-5 py-4 rounded-full bg-[#FEE500] text-black text-sm sm:text-base hover:brightness-95 transition-colors"
+          >
+            <span className="font-medium">카카오톡으로 청첩장 전하기</span>
+            <span className="flex items-center justify-center">
               <svg
-                className="w-4 h-4"
-                viewBox="0 0 112.55 122.88"
-                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M7 17L17 7M9 7h8v8"
+                />
+              </svg>
+            </span>
+          </button>
+
+          {/* Copy link button */}
+          <button
+            type="button"
+            onClick={copyPageLink}
+            className="w-full flex items-center justify-between px-5 py-4 rounded-full bg-gray-500 text-white text-sm sm:text-base hover:bg-gray-600 transition-colors"
+          >
+            <span className="font-medium">청첩장 주소 복사하기</span>
+            <span className="flex items-center justify-center">
+              <svg
+                className="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
                 aria-hidden="true"
               >
                 <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M104.41,6.1c6.26,5.13,6.93,11.83,7.62,13.46l0.34,2.5c0.9,5.39-1.65,12.75-5.58,17.38L89.2,59.84 c-6.76,7.84-18.04,10.44-27.48,6.37l-0.03,0.04c3.45,5.63,3.15,9.64,3.46,10.57c0.9,5.41-1.65,12.74-5.58,17.38L41.97,114.6 c-8.53,9.89-23.58,11.1-33.53,2.61c-5.04-5.04-7.84-9.31-8.37-16.49c-0.47-6.24,1.53-12.37,5.59-17.18l17.92-20.79 c5.01-5.14,7.5-5.86,13.33-7.47l2.5-0.34l10.66,1.56c0.22,0.08,0.44,0.18,0.65,0.27l0.03-0.04c-5.35-8.71-4.57-20.11,2.14-27.97 L70.48,8.37c4.11-4.77,9.99-7.71,16.15-8.19c5.37-0.89,12.77,1.64,17.38,5.58L104.41,6.1L104.41,6.1z M74.23,51.71l-3.66,4.24 l0.64,0.01l0.02,0l0.6-0.02l0.01,0l0.14-0.01l0.02,0c2.11-0.16,4.19-0.88,5.96-2.14c0.34-0.24,0.68-0.51,1.02-0.82l0,0l0,0 c0.3-0.27,0.62-0.59,0.93-0.95l0,0l0.12-0.13l17.45-20.24c1.47-1.7,2.36-3.75,2.68-5.86c0.07-0.44,0.11-0.87,0.13-1.26 c0.02-0.41,0.01-0.85-0.01-1.28l0-0.05l-0.01-0.11c-0.16-2.11-0.88-4.19-2.14-5.96c-0.24-0.34-0.51-0.67-0.78-0.97l-0.03-0.04 c-0.29-0.32-0.61-0.64-0.94-0.94l0,0l-0.06-0.05l-0.05-0.05L96.16,15c-1.69-1.43-3.7-2.3-5.78-2.61l-0.03,0 c-0.43-0.06-0.85-0.11-1.24-0.12c-0.41-0.02-0.84-0.01-1.27,0.01l-0.07,0l-0.1,0.01c-2.11,0.16-4.19,0.88-5.96,2.14 c-0.34,0.24-0.68,0.51-0.98,0.78l-0.03,0.03c-0.33,0.29-0.64,0.61-0.94,0.95l0,0l-0.12,0.13L62.2,36.55 c-1.47,1.7-2.36,3.75-2.68,5.86h0c-0.06,0.43-0.11,0.86-0.12,1.26c-0.02,0.41-0.01,0.85,0.01,1.28l0.01,0.15l0,0.01v0.02 c0.03,0.46,0.09,0.91,0.18,1.37l3.58-4.15l0.1-0.12l0.13-0.14l0,0l0.02-0.02c1.29-1.39,3.02-2.18,4.79-2.3 c1.78-0.13,3.62,0.39,5.1,1.6l0,0l0.02,0.01l0.09,0.08l0.02,0.02l0.02,0.02l0.01,0.01l0.02,0.01l0.07,0.06l0,0l0,0 c2.06,1.83,2.82,4.6,2.21,7.13c-0.12,0.5-0.3,1-0.54,1.48c-0.22,0.46-0.51,0.9-0.83,1.31l-0.02,0.02l-0.03,0.04l0,0l-0.01,0.02 l-0.1,0.12l0,0L74.23,51.71L74.23,51.71z M40.06,80.23L40.06,80.23c2.33,2.01,5.88,1.75,7.89-0.58l5.58-6.47 c0.65,1.45,1.04,3,1.16,4.57c0.25,3.44-0.79,6.97-3.19,9.75l-17.46,20.24c-2.4,2.79-5.73,4.34-9.16,4.59 c-3.38,0.25-6.84-0.75-9.59-3.05l-0.16-0.14c-2.78-2.4-4.34-5.73-4.59-9.16c-0.25-3.4,0.76-6.89,3.1-9.65l0.09-0.1l17.25-20l0,0 l0,0l0.21-0.24c2.4-2.78,5.73-4.34,9.16-4.59c1.58-0.12,3.18,0.04,4.71,0.47l-5.58,6.47C37.47,74.67,37.73,78.22,40.06,80.23 L40.06,80.23z"
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
                 />
               </svg>
-              링크 복사하기
-            </button>
-
-            <button
-              type="button"
-              onClick={shareKakao}
-              className="flex items-center justify-center gap-2 bg-[#FEE500] text-black text-sm rounded-md hover:brightness-95 px-3 py-3"
-            >
-              <svg
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d="M12 3C6.477 3 2 6.686 2 11c0 2.09 1.058 3.987 2.77 5.35-.09.86-.39 1.98-1.17 3.04-.12.17-.09.41.08.54.12.09.27.1.4.04 1.47-.69 2.66-1.51 3.52-2.19A13.8 13.8 0 0012 19c5.523 0 10-3.686 10-8s-4.477-8-10-8z" />
-              </svg>
-              카카오톡 공유하기
-            </button>
-          </div>
+            </span>
+          </button>
         </div>
       </section>
       <section>
         <div className="w-full px-6 py-2 mb-2">
           <p className="text-gray-600 text-center text-sm">
-            Copyright © 2025 Yejin Park. All rights reserved.
+            Copyright © 2026 Yejin Park. All rights reserved.
           </p>
         </div>
       </section>
