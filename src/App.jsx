@@ -756,16 +756,16 @@ function App() {
       {/* Full-Screen Banner */}
       <section className="w-full">
         {/* Centered container that matches the rest of your content width */}
-        <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
+        <div className="relative h-[100dvh] w-full max-w-2xl mx-auto overflow-hidden">
           {/* Background image only inside the centered box */}
-          <div className="absolute inset-0 bg-[url('/img/intro.jpg')] bg-cover bg-center" />
+          <div className="absolute inset-0 bg-[url('/img/banner.jpg')] bg-cover bg-center" />
 
           {/* Dark overlay for readability */}
           <div className="absolute inset-0 bg-black/40" />
 
           {/* Centered Title */}
           <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-white z-10">
-            <h1 className="text-xl mb-2 drop-shadow-lg font-maruburi-bold">
+            <h1 className="text-xl mb-2 drop-shadow-lg font-newyork">
               DEOKGON & DONGMIN
             </h1>
           </div>
@@ -777,10 +777,11 @@ function App() {
           </div>
         </div>
       </section>
+
       {/* Scrollable Content Below Banner */}
       <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 pb-16 pt-36">
         {/* INVITATION */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
           INVITATION
         </span>
 
@@ -839,7 +840,7 @@ function App() {
 
       {/* Calendar */}
       <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 pb-16 pt-36">
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2  font-newyork">
           WEDDING DAY
         </span>
         {/* Date and Time */}
@@ -966,7 +967,7 @@ function App() {
       {/* Gallery Section */}
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
         {/* Section Title */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2  font-newyork">
           GALLERY
         </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">
@@ -1001,7 +1002,7 @@ function App() {
       {/* Location Section */}
       <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 py-20">
         {/* Section Title */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
           LOCATION
         </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">오시는 길</h2>
@@ -1198,7 +1199,7 @@ function App() {
       {/* Information Section */}
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
         {/* Section Title */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
           INFORMATION
         </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">
@@ -1311,7 +1312,7 @@ function App() {
       </section>
       {/* Guest Book */}
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
           MESSAGE
         </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">방명록</h2>
@@ -1509,7 +1510,7 @@ function App() {
         </div>
       </section>
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
-        <span className="block text-lg text-gray-500 tracking-widest mb-2">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
           ACCOUNT
         </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-2">
