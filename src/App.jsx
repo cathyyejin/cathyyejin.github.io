@@ -530,9 +530,8 @@ function App() {
               <p className="text-gray-700 mb-2">
                 식사는 결혼식 및 사진 촬영이 끝난 후{' '}
               </p>
-              <p className="text-gray-700 mb-2">
-                외교원 지하 1층에서 뷔폐식으로 진행됩니다.
-              </p>
+              <p className="text-gray-700 mb-2">외교원 지하 1층에서</p>
+              <p className="text-gray-700 mb-6">뷔폐식으로 진행됩니다.</p>
               <p className="text-gray-700 mb-2">부족함 없이 즐기실 수 있도록</p>
               <p className="text-gray-700 mb-2">
                 한식을 비롯해 중식, 양식, 일식등
@@ -559,11 +558,10 @@ function App() {
                 </p>
               </div>
               <p className="text-gray-700 mb-2">
-                예식 후, 저희의 소중한 순간을 함께한 생화를
+                예식 후, 저희의 소중한 순간을 함께한
               </p>
-              <p className="text-gray-700 mb-2">
-                작은 감사의 마음으로 나누어 드립니다.
-              </p>
+              <p className="text-gray-700 mb-2">생화를 작은 감사의 마음으로</p>
+              <p className="text-gray-700 mb-2">나누어 드립니다.</p>
               <p className="text-gray-700 mb-2">
                 원하시는 분께서는 자유롭게 받아가 주세요.
               </p>
@@ -1922,12 +1920,12 @@ function App() {
             onClick={closeContact}
           />
           <div className="relative w-full max-w-md max-h-[90vh] bg-gradient-to-b from-stone-900/95 via-stone-900/90 to-stone-800/90 text-white rounded-3xl shadow-2xl ring-1 ring-white/10 overflow-hidden flex flex-col my-auto">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 flex-shrink-0">
               <div>
                 <div className="text-xs uppercase tracking-[0.3em] text-white/70">
                   Contact
                 </div>
-                <div className="text-2xl font-semibold">연락하기</div>
+                <div className="text-xl font-semibold">연락하기</div>
               </div>
               <button
                 type="button"
@@ -1951,31 +1949,31 @@ function App() {
                 </svg>
               </button>
             </div>
-            <div className="px-6 py-5 space-y-7 overflow-y-auto flex-1">
+            <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1 min-h-0">
               {contactGroups.map((group) => (
-                <div key={group.title} className="space-y-3">
-                  <div className="text-sm uppercase tracking-[0.25em] text-white/70">
+                <div key={group.title} className="space-y-2">
+                  <div className="text-xs uppercase tracking-[0.25em] text-white/70">
                     {group.title}
                   </div>
                   <div className="border-t border-white/15" />
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {group.items.map((item) => (
                       <div
                         key={item.role + item.name}
-                        className="flex items-center justify-between gap-4 rounded-2xl bg-white/5 px-4 py-3"
+                        className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3 py-2"
                       >
                         <div>
-                          <div className="text-sm text-white/80">
+                          <div className="text-xs text-white/80">
                             {item.role}
                           </div>
-                          <div className="text-lg font-semibold">
+                          <div className="text-base font-semibold">
                             {item.name}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <a
                             href={`tel:${item.phone}`}
-                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
+                            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition"
                             aria-label={`${item.name}에게 전화하기`}
                           >
                             <svg
@@ -1983,13 +1981,13 @@ function App() {
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
-                              className="w-5 h-5"
+                              className="w-4 h-4"
                             >
                               <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M3.5 5.5c0-1.1.9-2 2-2h1.3c.5 0 .9.3 1 .8l.8 3.1c.1.5 0 1-.4 1.4l-1 1c.8 1.6 2.1 2.9 3.7 3.7l1-1c.4-.4.9-.5 1.4-.4l3.1.8c.5.1.8.5.8 1v1.3c0 1.1-.9 2-2 2H16C9.9 18 6 14.1 6 8V7.5"
+                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                               />
                             </svg>
                           </a>
