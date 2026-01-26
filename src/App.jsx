@@ -1,5 +1,6 @@
 import './App.css';
 import { useState, useEffect, useRef } from 'react';
+import { initKakao, shareKakao as shareKakaoAPI } from './kakao';
 
 function Toast({ open, message, type, onClose, position = 'bottom' }) {
   const color = type === 'error' ? 'bg-rose-600' : 'bg-emerald-600';
@@ -453,51 +454,38 @@ function App() {
     }
   };
 
+  // Kakao SDK 초기화
   useEffect(() => {
-    const key = import.meta.env.VITE_KAKAO_JS_KEY;
-    if (!key) return;
-    if (window.Kakao?.isInitialized?.()) return;
-
-    const existing = document.querySelector('script[data-kakao-sdk]');
-    if (!existing) {
-      const s = document.createElement('script');
-      s.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
-      s.async = true;
-      s.defer = true;
-      s.setAttribute('data-kakao-sdk', 'true');
-      s.onload = () => {
-        if (window.Kakao && !window.Kakao.isInitialized())
-          window.Kakao.init(key);
-      };
-      document.head.appendChild(s);
-    } else if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init(key);
+    const key =
+      import.meta.env.VITE_KAKAO_JS_KEY || import.meta.env.VITE_KAKAO_API_KEY;
+    if (key) {
+      initKakao(key).catch((error) => {
+        console.error('Failed to initialize Kakao SDK:', error);
+      });
     }
   }, []);
 
-  const shareKakao = () => {
-    const Kakao = window.Kakao;
-    const url = window.location.href;
+  // Kakao 공유 함수
+  const shareKakao = async () => {
+    const apiKey =
+      import.meta.env.VITE_KAKAO_JS_KEY || import.meta.env.VITE_KAKAO_API_KEY;
 
-    if (!Kakao) {
-      // SDK가 없으면 기존 sharePage로 대체
-      return sharePage?.() ?? copyPageLink?.();
-    }
-    if (!Kakao.isInitialized()) Kakao.init(import.meta.env.VITE_KAKAO_JS_KEY);
-
-    Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
+    const success = await shareKakaoAPI(
+      {
         title: '초대장',
         description: '초대장을 공유합니다.',
-        imageUrl: `${window.location.origin}/img/intro.png`, // https 공개 경로
-        link: { mobileWebUrl: url, webUrl: url },
+        imageUrl: `${window.location.origin}/img/intro.jpg`,
+        buttonTitle: '자세히 보기',
       },
-      buttons: [
-        { title: '자세히 보기', link: { mobileWebUrl: url, webUrl: url } },
-      ],
-    });
-    showToast?.('카카오톡으로 공유를 시작했어요!');
+      apiKey
+    );
+
+    if (success) {
+      showToast?.('카카오톡으로 공유를 시작했어요!');
+    } else {
+      // 실패 시 기존 공유 방법으로 대체
+      sharePage?.() ?? copyPageLink?.();
+    }
   };
 
   const renderTabContent = () => {
