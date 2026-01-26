@@ -1,6 +1,6 @@
 import './App.css';
 import { useState, useEffect, useRef } from 'react';
-import { initKakao, shareKakao as shareKakaoAPI } from './kakao';
+import { shareKakao as shareKakaoAPI } from './kakao';
 
 function Toast({ open, message, type, onClose, position = 'bottom' }) {
   const color = type === 'error' ? 'bg-rose-600' : 'bg-emerald-600';
@@ -454,31 +454,23 @@ function App() {
     }
   };
 
-  // Kakao SDK 초기화
-  useEffect(() => {
-    const key =
-      import.meta.env.VITE_KAKAO_JS_KEY || import.meta.env.VITE_KAKAO_API_KEY;
-    if (key) {
-      initKakao(key).catch((error) => {
-        console.error('Failed to initialize Kakao SDK:', error);
-      });
-    }
-  }, []);
-
   // Kakao 공유 함수
   const shareKakao = async () => {
     const apiKey =
       import.meta.env.VITE_KAKAO_JS_KEY || import.meta.env.VITE_KAKAO_API_KEY;
+    // 템플릿 ID: 환경 변수에서 가져오거나 기본값 사용
+    const templateId = import.meta.env.VITE_KAKAO_TEMPLATE_ID || '123425';
 
-    const success = await shareKakaoAPI(
-      {
-        title: '초대장',
-        description: '초대장을 공유합니다.',
-        imageUrl: `${window.location.origin}/img/intro.jpg`,
-        buttonTitle: '자세히 보기',
+    // 템플릿 사용
+    const shareOptions = {
+      templateId: templateId,
+      templateArgs: {
+        // 템플릿에서 사용하는 인자가 있다면 여기에 추가
+        // 예: KEY: 'value'
       },
-      apiKey
-    );
+    };
+
+    const success = await shareKakaoAPI(shareOptions, apiKey);
 
     if (success) {
       showToast?.('카카오톡으로 공유를 시작했어요!');
