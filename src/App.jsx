@@ -242,18 +242,40 @@ function App() {
 
   // Sample images - replace with your actual images
   const images = [
-    'img/intro.jpg',
-    'img/gallery1.jpg',
-    'img/gallery2_thumbnail.jpg',
-    'img/gallery3.jpg',
-    'img/gallery4.jpg',
-    'img/gallery5.jpg',
-    'img/gallery6.jpg',
-    'img/gallery7.jpg',
-    'img/gallery8.jpg',
-    'img/gallery9.jpg',
-    'img/gallery10.jpg',
+    'img/01.jpg',
+    'img/03.jpg',
+    'img/04.jpg',
+    'img/07.jpg',
+    'img/09.jpg',
+    'img/11.jpg',
+    'img/12.jpg',
+    'img/13.jpg',
+    'img/14.jpg',
+    'img/15.jpg',
+    'img/16.jpg',
+    'img/17.jpg',
+    'img/18.jpg',
+    'img/19.jpg',
+    'img/20.jpg',
   ];
+
+  // Custom crop positions for specific images (optional)
+  // Use image index as key, and position as value
+  // Options: 'center', 'top', 'bottom', 'left', 'right', 'top left', 'top right', 'bottom left', 'bottom right'
+  // Or use custom CSS values like '30% 70%', 'center top', etc.
+  const imagePositions = {
+    // Example:
+    // 0: 'top',           // First image shows top portion
+    // 2: 'bottom',        // Third image shows bottom portion
+    // 5: 'left',          // Sixth image shows left portion
+    // 7: 'center top',    // Eighth image shows center-top
+    // 10: '30% 70%',      // Eleventh image uses custom position
+    0: 'top',
+    1: 'top',
+    4: 'bottom',
+    8: 'top',
+    10: 'top',
+  };
 
   const scrollerRef = useRef(null);
 
@@ -270,6 +292,22 @@ function App() {
     const idx = Math.round(el.scrollLeft / el.clientWidth);
     if (idx !== currentImage) setCurrentImage(idx);
   };
+
+  // Scroll to selected image when gallery opens
+  useEffect(() => {
+    if (isGalleryOpen && scrollerRef.current) {
+      // Use setTimeout to ensure the DOM is ready
+      setTimeout(() => {
+        const el = scrollerRef.current;
+        if (el) {
+          el.scrollTo({
+            left: currentImage * el.clientWidth,
+            behavior: 'instant',
+          });
+        }
+      }, 0);
+    }
+  }, [isGalleryOpen, currentImage]);
 
   const IconSubway = (props) => (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
@@ -492,21 +530,15 @@ function App() {
               <p className="text-gray-700 mb-2">
                 식사는 결혼식 및 사진 촬영이 끝난 후{' '}
               </p>
-              <p className="text-gray-700 mb-2">외교원 지하 1층에서</p>
-              <p className="text-gray-700 mb-2">뷔폐식으로 진행됩니다.</p>
+              <p className="text-gray-700 mb-2">
+                외교원 지하 1층에서 뷔폐식으로 진행됩니다.
+              </p>
               <p className="text-gray-700 mb-2">부족함 없이 즐기실 수 있도록</p>
               <p className="text-gray-700 mb-2">
                 한식을 비롯해 중식, 양식, 일식등
               </p>
               <p className="text-gray-700 mb-2">
                 다양한 메뉴가 준비되어 있습니다.
-              </p>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">
-                *예식 참석 시 반드시 청첩장 <br />
-                (모바일 포함)을 제시해야만 <br />
-                출입이 가능합니다.
               </p>
             </div>
           </div>
@@ -516,15 +548,25 @@ function App() {
           <div className="w-full max-w-2xl bg-white p-6 rounded-lg shadow-md text-center">
             <div className="mb-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                주차 안내
+                예식 안내
               </h3>
+              <div className="bg-yellow-50 p-4 rounded-lg mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  *예식 참석 시 반드시 청첩장 (모바일 포함)을
+                </p>
+                <p className="text-sm text-gray-600">
+                  제시해야만 출입이 가능합니다.
+                </p>
+              </div>
               <p className="text-gray-700 mb-2">
-                국립외교원 내 무료 주차 이용 가능
+                예식 후, 저희의 소중한 순간을 함께한 생화를
               </p>
-            </div>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">주차 시간: 3시간 무료</p>
-              <p className="text-sm text-gray-600">위치: 지하 1층 ~ 3층</p>
+              <p className="text-gray-700 mb-2">
+                작은 감사의 마음으로 나누어 드립니다.
+              </p>
+              <p className="text-gray-700 mb-2">
+                원하시는 분께서는 자유롭게 받아가 주세요.
+              </p>
             </div>
           </div>
         );
@@ -601,12 +643,12 @@ function App() {
         {
           role: '신랑 아버지',
           name: '김기훈',
-          phone: '010-2345-6789',
+          phone: '010-9160-4551',
         },
         {
           role: '신랑 어머니',
           name: '김순희',
-          phone: '010-3456-7890',
+          phone: '010-9950-4651',
         },
       ],
     },
@@ -735,26 +777,10 @@ function App() {
     <div className="w-full">
       {/* Full-Screen Banner */}
       <section className="w-full">
-        {/* Centered container that matches the rest of your content width */}
-        <div className="relative h-[100dvh] w-full max-w-2xl mx-auto overflow-hidden">
-          {/* Background image only inside the centered box */}
-          <div className="absolute inset-0 bg-[url('/img/banner.jpg')] bg-cover bg-center" />
-
-          {/* Dark overlay for readability */}
-          <div className="absolute inset-0 bg-black/40" />
-
-          {/* Centered Title */}
-          <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-white z-10">
-            <h1 className="text-xl mb-2 drop-shadow-lg font-newyork">
-              DEOKGON & DONGMIN
-            </h1>
-          </div>
-
-          {/* Bottom Text Section */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full px-4 text-center text-white z-10">
-            <p className="text-lg mb-2 drop-shadow">2026년 5월 16일 오후 3시</p>
-            <p className="text-lg mb-2 drop-shadow">국립외교원</p>
-          </div>
+        {/* Full screen image container */}
+        <div className="relative h-[100dvh] w-full overflow-hidden">
+          {/* Background image - full screen without cropping */}
+          <div className="absolute inset-0 bg-[url('/img/IMG_1519.jpg')] bg-contain bg-center bg-no-repeat" />
         </div>
       </section>
 
@@ -813,8 +839,13 @@ function App() {
       <section className="w-full">
         {/* Centered container that matches the rest of your content width */}
         <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
-          {/* Background image only inside the centered box */}
-          <div className="absolute inset-0 bg-[url('/img/cover2.jpg')] bg-cover bg-center" />
+          {/* Image - contain to show full width, crop top/bottom slightly */}
+          {/* <img
+            src="/img/02.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-[78%] object-contain object-center "
+          /> */}
+          <div className="absolute inset-0 bg-[url('/img/02.jpg')] bg-cover bg-center" />
         </div>
       </section>
 
@@ -825,12 +856,14 @@ function App() {
         </span>
         {/* Date and Time */}
         <div className="mb-6 text-center">
-          <div className="text-lg text-gray-900 font-medium">2026.05.16</div>
+          <div className="text-2xl text-gray-900 font-medium mb-1">
+            2026.05.16
+          </div>
           <div className="text-base text-gray-700">토요일 오후 3시</div>
         </div>
         <div className="w-full max-w-xs border-t border-b border-gray-400 py-4 mb-2">
           <div className="grid grid-cols-7 text-center text-gray-700 font-medium mb-2">
-            <div>일</div>
+            <div className="text-rose-500">일</div>
             <div>월</div>
             <div>화</div>
             <div>수</div>
@@ -841,7 +874,7 @@ function App() {
           {/* May 2026 Calendar with highlighted 16th */}
           <div className="grid grid-cols-7 text-center text-gray-900 gap-y-2">
             {/* Week 1 - May starts on Friday */}
-            <div className="h-8 flex items-center justify-center"></div>
+            <div className="h-8 flex items-center justify-center text-rose-500"></div>
             <div className="h-8 flex items-center justify-center"></div>
             <div className="h-8 flex items-center justify-center"></div>
             <div className="h-8 flex items-center justify-center"></div>
@@ -850,16 +883,22 @@ function App() {
             <div className="h-8 flex items-center justify-center">2</div>
 
             {/* Week 2 */}
-            <div className="h-8 flex items-center justify-center">3</div>
+            <div className="h-8 flex items-center justify-center text-rose-500">
+              3
+            </div>
             <div className="h-8 flex items-center justify-center">4</div>
-            <div className="h-8 flex items-center justify-center">5</div>
+            <div className="h-8 flex items-center justify-center text-rose-500">
+              5
+            </div>
             <div className="h-8 flex items-center justify-center">6</div>
             <div className="h-8 flex items-center justify-center">7</div>
             <div className="h-8 flex items-center justify-center">8</div>
             <div className="h-8 flex items-center justify-center">9</div>
 
             {/* Week 3 - Highlight the 16th */}
-            <div className="h-8 flex items-center justify-center">10</div>
+            <div className="h-8 flex items-center justify-center text-rose-500">
+              10
+            </div>
             <div className="h-8 flex items-center justify-center">11</div>
             <div className="h-8 flex items-center justify-center">12</div>
             <div className="h-8 flex items-center justify-center">13</div>
@@ -872,7 +911,9 @@ function App() {
             </div>
 
             {/* Week 4 */}
-            <div className="h-8 flex items-center justify-center">17</div>
+            <div className="h-8 flex items-center justify-center text-rose-500">
+              17
+            </div>
             <div className="h-8 flex items-center justify-center">18</div>
             <div className="h-8 flex items-center justify-center">19</div>
             <div className="h-8 flex items-center justify-center">20</div>
@@ -881,8 +922,12 @@ function App() {
             <div className="h-8 flex items-center justify-center">23</div>
 
             {/* Week 5 */}
-            <div className="h-8 flex items-center justify-center">24</div>
-            <div className="h-8 flex items-center justify-center">25</div>
+            <div className="h-8 flex items-center justify-center text-rose-500">
+              24
+            </div>
+            <div className="h-8 flex items-center justify-center text-rose-500">
+              25
+            </div>
             <div className="h-8 flex items-center justify-center">26</div>
             <div className="h-8 flex items-center justify-center">27</div>
             <div className="h-8 flex items-center justify-center">28</div>
@@ -890,7 +935,9 @@ function App() {
             <div className="h-8 flex items-center justify-center">30</div>
 
             {/* Week 6 */}
-            <div className="h-8 flex items-center justify-center">31</div>
+            <div className="h-8 flex items-center justify-center text-rose-500">
+              31
+            </div>
             <div className="h-8 flex items-center justify-center"></div>
             <div className="h-8 flex items-center justify-center"></div>
             <div className="h-8 flex items-center justify-center"></div>
@@ -947,7 +994,7 @@ function App() {
       {/* Gallery Section */}
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
         {/* Section Title */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2  font-newyork">
+        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
           GALLERY
         </span>
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">
@@ -956,7 +1003,7 @@ function App() {
         {/* Grid Gallery */}
         <div className="w-full max-w-3xl">
           <div className="grid grid-cols-3 gap-1 sm:gap-2">
-            {images.slice(0, 9).map((src, i) => (
+            {images.slice(0, 15).map((src, i) => (
               <button
                 key={i}
                 type="button"
@@ -969,7 +1016,10 @@ function App() {
                 <img
                   src={src}
                   alt={`Gallery ${i + 1}`}
-                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-200 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                  style={{
+                    objectPosition: imagePositions[i] || 'center',
+                  }}
                   draggable={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -1171,7 +1221,7 @@ function App() {
             </div>
             <div className="ml-2 space-y-2">
               <p>국립외교원 내 지상주차장</p>
-              <p>양가 혼주 카운터에서 주차 등록 후 출차</p>
+              <p>주차 공간이 넉넉하여 자가용 이용이 가능합니다.</p>
             </div>
           </div>
         </div>
@@ -1533,11 +1583,11 @@ function App() {
                 </div>
                 <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
                   <div className="text-sm text-gray-600">
-                    <div className="text-gray-500">신한은행</div>
-                    <div className="tracking-wide">368-06-704954</div>
+                    <div className="text-gray-500">국민은행</div>
+                    <div className="tracking-wide">842401-01-748467</div>
                   </div>
                   <button
-                    onClick={() => copyAccount('987-654-321098')}
+                    onClick={() => copyAccount('842401-01-748467')}
                     className="flex items-center gap-1 text-sm text-gray-700"
                   >
                     <svg
@@ -1576,11 +1626,11 @@ function App() {
                 </div>
                 <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
                   <div className="text-sm text-gray-600">
-                    <div className="text-gray-500">신한은행</div>
-                    <div className="tracking-wide">368-06-704954</div>
+                    <div className="text-gray-500">경남은행</div>
+                    <div className="tracking-wide">508-21-0361647</div>
                   </div>
                   <button
-                    onClick={() => copyAccount('987-654-321098')}
+                    onClick={() => copyAccount('508-21-0361647')}
                     className="flex items-center gap-1 text-sm text-gray-700"
                   >
                     <svg
@@ -1619,11 +1669,11 @@ function App() {
                 </div>
                 <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
                   <div className="text-sm text-gray-600">
-                    <div className="text-gray-500">신한은행</div>
-                    <div className="tracking-wide">368-06-704954</div>
+                    <div className="text-gray-500">농협은행</div>
+                    <div className="tracking-wide">865-12-344654</div>
                   </div>
                   <button
-                    onClick={() => copyAccount('987-654-321098')}
+                    onClick={() => copyAccount('865-12-344654')}
                     className="flex items-center gap-1 text-sm text-gray-700"
                   >
                     <svg
@@ -1698,7 +1748,7 @@ function App() {
                     <div className="tracking-wide">368-06-704954</div>
                   </div>
                   <button
-                    onClick={() => copyAccount('987-654-321098')}
+                    onClick={() => copyAccount('368-06-704954')}
                     className="flex items-center gap-1 text-sm text-gray-700"
                   >
                     <svg
@@ -1738,53 +1788,10 @@ function App() {
                 <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
                   <div className="text-sm text-gray-600">
                     <div className="text-gray-500">신한은행</div>
-                    <div className="tracking-wide">368-06-704954</div>
+                    <div className="tracking-wide">110-368-652685</div>
                   </div>
                   <button
-                    onClick={() => copyAccount('987-654-321098')}
-                    className="flex items-center gap-1 text-sm text-gray-700"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
-                        d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
-                        stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                      <path
-                        d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
-                        stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                    <span>복사</span>
-                  </button>
-                </div>
-              </div>
-              {/* Bride Account 3 (신부 어머니) */}
-              <div className="rounded-2xl bg-white shadow-sm p-4 space-y-3">
-                <div className="flex items-center justify-between text-sm text-gray-700">
-                  <span>신부 어머니</span>
-                  <span className="font-medium">나은효</span>
-                </div>
-                <div className="flex items-center justify-between rounded-xl bg-gray-100 px-4 py-3">
-                  <div className="text-sm text-gray-600">
-                    <div className="text-gray-500">신한은행</div>
-                    <div className="tracking-wide">368-06-704954</div>
-                  </div>
-                  <button
-                    onClick={() => copyAccount('987-654-321098')}
+                    onClick={() => copyAccount('110-368-652685')}
                     className="flex items-center gap-1 text-sm text-gray-700"
                   >
                     <svg
@@ -1825,7 +1832,7 @@ function App() {
         {/* Centered container that matches the rest of your content width */}
         <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
           {/* Background image only inside the centered box */}
-          <div className="absolute inset-0 bg-[url('/img/last.jpg')] bg-cover bg-center" />
+          <div className="absolute inset-0 bg-[url('/img/08.jpg')] bg-cover bg-center" />
 
           {/* Bottom overlay with quote */}
           <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-neutral-900/90 via-neutral-900/70 to-transparent" />
@@ -1909,12 +1916,12 @@ function App() {
         </div>
       )}
       {isContactOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-md"
             onClick={closeContact}
           />
-          <div className="relative w-full max-w-md bg-gradient-to-b from-stone-900/95 via-stone-900/90 to-stone-800/90 text-white rounded-3xl shadow-2xl ring-1 ring-white/10 overflow-hidden">
+          <div className="relative w-full max-w-md max-h-[90vh] bg-gradient-to-b from-stone-900/95 via-stone-900/90 to-stone-800/90 text-white rounded-3xl shadow-2xl ring-1 ring-white/10 overflow-hidden flex flex-col my-auto">
             <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
               <div>
                 <div className="text-xs uppercase tracking-[0.3em] text-white/70">
@@ -1944,7 +1951,7 @@ function App() {
                 </svg>
               </button>
             </div>
-            <div className="px-6 py-5 space-y-7">
+            <div className="px-6 py-5 space-y-7 overflow-y-auto flex-1">
               {contactGroups.map((group) => (
                 <div key={group.title} className="space-y-3">
                   <div className="text-sm uppercase tracking-[0.25em] text-white/70">
