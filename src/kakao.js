@@ -110,8 +110,10 @@ export const initKakao = async (apiKey) => {
  * @property {string} imageUrl - 공유할 이미지 URL (HTTPS 필수)
  * @property {string} [url] - 공유할 링크 (기본값: 현재 페이지 URL)
  * @property {string} [buttonTitle] - 버튼 제목 (기본값: '자세히 보기')
+ * @property {Array} [buttons] - 버튼 배열 (기본 방식 사용 시, 여러 버튼 가능)
  * @property {string} [templateId] - Kakao 템플릿 ID (템플릿 사용 시)
  * @property {Object} [templateArgs] - 템플릿 인자 (템플릿 사용 시)
+ * @property {Object} [serverCallbackArgs] - 서버 콜백 인자 (템플릿 사용 시)
  */
 
 /**
@@ -145,12 +147,24 @@ export const shareKakao = async (options, apiKey) => {
     // 템플릿 ID가 있으면 템플릿 사용, 없으면 기본 방식
     if (options.templateId) {
       // 템플릿 사용 (sendCustom)
+      // Note: Buttons are typically configured in the template, but we can add serverCallbackArgs if needed
       window.Kakao.Share.sendCustom({
         templateId: options.templateId,
         templateArgs: options.templateArgs || {},
+        serverCallbackArgs: options.serverCallbackArgs || {},
       });
     } else {
-      // 기본 방식 (sendDefault)
+      // 기본 방식 (sendDefault) - supports multiple buttons
+      const buttons = options.buttons || [
+        {
+          title: options.buttonTitle || '자세히 보기',
+          link: {
+            mobileWebUrl: currentUrl,
+            webUrl: currentUrl,
+          },
+        },
+      ];
+
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
@@ -163,15 +177,7 @@ export const shareKakao = async (options, apiKey) => {
             webUrl: currentUrl,
           },
         },
-        buttons: [
-          {
-            title: options.buttonTitle || '자세히 보기',
-            link: {
-              mobileWebUrl: currentUrl,
-              webUrl: currentUrl,
-            },
-          },
-        ],
+        buttons: buttons,
       });
     }
 

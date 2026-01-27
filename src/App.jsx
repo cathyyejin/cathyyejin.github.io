@@ -527,10 +527,8 @@ function App() {
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
                 식사 안내
               </h3>
-              <p className="text-gray-700 mb-2">
-                식사는 결혼식 및 사진 촬영이 끝난 후{' '}
-              </p>
-              <p className="text-gray-700 mb-2">외교원 지하 1층에서</p>
+              <p className="text-gray-700 mb-2">식사는 결혼식 및 사진 촬영이</p>
+              <p className="text-gray-700 mb-2">끝난 후, 외교원 지하 1층에서</p>
               <p className="text-gray-700 mb-6">뷔폐식으로 진행됩니다.</p>
               <p className="text-gray-700 mb-2">부족함 없이 즐기실 수 있도록</p>
               <p className="text-gray-700 mb-2">
@@ -549,22 +547,22 @@ function App() {
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
                 예식 안내
               </h3>
-              <div className="bg-yellow-50 p-4 rounded-lg mb-4">
+              <div className="bg-yellow-50 p-4 rounded-lg mb-6">
                 <p className="text-sm text-gray-600 mb-2">
-                  *예식 참석 시 반드시 청첩장 (모바일 포함)을
+                  *예식 참석 시 반드시 청첩장
                 </p>
-                <p className="text-sm text-gray-600">
-                  제시해야만 출입이 가능합니다.
+                <p className="text-sm text-gray-600 mb-2">
+                  (모바일 포함)을 제시해야만
                 </p>
+                <p className="text-sm text-gray-600">출입이 가능합니다.</p>
               </div>
               <p className="text-gray-700 mb-2">
-                예식 후, 저희의 소중한 순간을 함께한
+                예식 후, 저희의 소중한 순간을
               </p>
-              <p className="text-gray-700 mb-2">생화를 작은 감사의 마음으로</p>
-              <p className="text-gray-700 mb-2">나누어 드립니다.</p>
-              <p className="text-gray-700 mb-2">
-                원하시는 분께서는 자유롭게 받아가 주세요.
-              </p>
+              <p className="text-gray-700 mb-2">함께한 생화를 작은 감사의 </p>
+              <p className="text-gray-700 mb-6">마음으로 나누어 드립니다.</p>
+              <p className="text-gray-700 mb-2">원하시는 분께서는 </p>
+              <p className="text-gray-700 mb-2">자유롭게 받아가 주세요.</p>
             </div>
           </div>
         );
