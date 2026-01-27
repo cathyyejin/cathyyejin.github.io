@@ -528,8 +528,10 @@ function App() {
   const shareKakao = async () => {
     const apiKey =
       import.meta.env.VITE_KAKAO_JS_KEY || import.meta.env.VITE_KAKAO_API_KEY;
-    // 템플릿 ID: 환경 변수에서 가져오거나 기본값 사용
-    const templateId = import.meta.env.VITE_KAKAO_TEMPLATE_ID || '123425';
+    // 템플릿 ID: 환경 변수에서 가져오거나 기본값 사용 (숫자로 변환)
+    const templateId = Number(
+      import.meta.env.VITE_KAKAO_TEMPLATE_ID || '123425'
+    );
     const currentUrl = window.location.href;
 
     // 템플릿 사용 (템플릿에 설정된 버튼이 자동으로 포함됨)
@@ -546,6 +548,9 @@ function App() {
         // LINK_URL: currentUrl,
       },
     };
+
+    console.log('Sharing with template ID:', templateId);
+    console.log('Share options:', shareOptions);
 
     const success = await shareKakaoAPI(shareOptions, apiKey);
 

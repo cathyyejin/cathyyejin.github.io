@@ -148,11 +148,35 @@ export const shareKakao = async (options, apiKey) => {
     if (options.templateId) {
       // 템플릿 사용 (sendCustom)
       // Note: Buttons are typically configured in the template, but we can add serverCallbackArgs if needed
-      window.Kakao.Share.sendCustom({
-        templateId: options.templateId,
-        templateArgs: options.templateArgs || {},
-        serverCallbackArgs: options.serverCallbackArgs || {},
-      });
+      // templateId는 숫자여야 함
+      const templateId = Number(options.templateId);
+      if (isNaN(templateId)) {
+        console.error('Invalid templateId:', options.templateId);
+        return false;
+      }
+
+      const customOptions = {
+        templateId: templateId,
+      };
+
+      // templateArgs가 있고 비어있지 않으면 추가
+      if (
+        options.templateArgs &&
+        Object.keys(options.templateArgs).length > 0
+      ) {
+        customOptions.templateArgs = options.templateArgs;
+      }
+
+      // serverCallbackArgs가 있으면 추가
+      if (
+        options.serverCallbackArgs &&
+        Object.keys(options.serverCallbackArgs).length > 0
+      ) {
+        customOptions.serverCallbackArgs = options.serverCallbackArgs;
+      }
+
+      console.log('Kakao Share Custom Options:', customOptions);
+      window.Kakao.Share.sendCustom(customOptions);
     } else {
       // 기본 방식 (sendDefault) - supports multiple buttons
       const buttons = options.buttons || [
