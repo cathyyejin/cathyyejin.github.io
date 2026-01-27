@@ -534,22 +534,20 @@ function App() {
     );
     const currentUrl = window.location.href;
 
-    // 템플릿 사용 (템플릿에 설정된 버튼이 자동으로 포함됨)
-    // 템플릿에서 ${KEY} 형식으로 사용하는 변수들을 여기에 매핑
-    // 예: 템플릿에 ${TITLE}이 있으면 TITLE: '값' 형태로 전달
+    // 사용자 정의 템플릿 사용 (Feed 템플릿)
+    // 템플릿에 설정된 버튼이 자동으로 포함됨
+    // 템플릿에서 ${KEY} 형식으로 사용하는 변수가 있다면 templateArgs에 추가
     const shareOptions = {
       templateId: templateId,
       templateArgs: {
         // 템플릿에서 사용하는 키를 여기에 추가하세요
-        // 예시 (템플릿에 실제로 사용하는 키에 맞게 수정):
+        // 예: 템플릿에 ${TITLE}이 있으면 TITLE: '값' 형태로 전달
         // TITLE: '김덕곤 ❤️ 구동민 결혼합니다',
-        // DESCRIPTION: '2026년 5월 16일 토요일 오후 3시 국립외교원',
-        // IMAGE_URL: `${window.location.origin}/img/05.jpg`,
-        // LINK_URL: currentUrl,
+        // DESC: '2026년 5월 16일 토요일 오후 3시 국립외교원',
       },
     };
 
-    console.log('Sharing with template ID:', templateId);
+    console.log('Sharing with Feed template ID:', templateId);
     console.log('Share options:', shareOptions);
 
     const success = await shareKakaoAPI(shareOptions, apiKey);
