@@ -496,16 +496,30 @@ function App() {
   const shareKakao = async () => {
     const apiKey =
       import.meta.env.VITE_KAKAO_JS_KEY || import.meta.env.VITE_KAKAO_API_KEY;
-    // 템플릿 ID: 환경 변수에서 가져오거나 기본값 사용
-    const templateId = import.meta.env.VITE_KAKAO_TEMPLATE_ID || '123425';
+    const currentUrl = window.location.href;
 
-    // 템플릿 사용
+    // sendDefault를 사용하여 버튼을 명시적으로 추가
     const shareOptions = {
-      templateId: templateId,
-      templateArgs: {
-        // 템플릿에서 사용하는 인자가 있다면 여기에 추가
-        // 예: KEY: 'value'
-      },
+      title: '김덕곤 ❤️ 구동민 결혼합니다',
+      description: '2026년 5월 16일 토요일 오후 3시 국립외교원',
+      imageUrl: `${window.location.origin}/img/05.jpg`,
+      url: currentUrl,
+      buttons: [
+        {
+          title: '청접장 보기',
+          link: {
+            mobileWebUrl: currentUrl,
+            webUrl: currentUrl,
+          },
+        },
+        {
+          title: '위치 보기',
+          link: {
+            mobileWebUrl: 'https://kko.to/ShScpPRLU4',
+            webUrl: 'https://kko.to/ShScpPRLU4',
+          },
+        },
+      ],
     };
 
     const success = await shareKakaoAPI(shareOptions, apiKey);
@@ -1060,36 +1074,6 @@ function App() {
           />
         </div>
         {/* Navigation Buttons */}
-        {/* <div className="w-full max-w-2xl mx-auto flex flex-nowrap gap-2 mb-8">
-          <a
-            href="https://tmap.co.kr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center bg-gray-50 text-gray-600 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
-          >
-            <img src="/img/tmap.png" alt="Tmap" className="w-5 h-5 mr-2" />
-            티맵
-          </a>
-          <a
-            href="https://place.map.kakao.com/8490883"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center bg-gray-50 text-gray-600 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
-          >
-            <img src="/img/kakao.png" alt="Kakao" className="w-5 h-5 mr-2" />
-            카카오내비
-          </a>
-          <a
-            href="https://naver.me/5uIYnFoR"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center bg-gray-50 text-gray-600 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
-          >
-            <img src="/img/naver.png" alt="Naver" className="w-5 h-5 mr-2" />
-            네이버지도
-          </a>
-        </div> */}
-        {/* Navigation Buttons */}
         <div className="w-full max-w-2xl mx-auto">
           <div className="grid grid-cols-3 gap-2">
             <a
@@ -1264,46 +1248,6 @@ function App() {
 
         </div> */}
         {/* Tab Tabs (Segmented) */}
-        {/* <div className="w-full max-w-2xl mb-8">
-          <div
-            role="tablist"
-            aria-label="안내사항 탭"
-            className="grid grid-cols-3 gap-1 rounded-xl bg-gray-100 p-1"
-          >
-            <button
-              role="tab"
-              aria-selected={activeTab === 'photo'}
-              tabIndex={activeTab === 'photo' ? 0 : -1}
-              onClick={() => setActiveTab('photo')}
-              className={`py-3 text-sm font-medium rounded-lg text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400
-        ${activeTab === 'photo' ? 'bg-white shadow text-gray-900' : 'text-gray-600 hover:text-gray-800'}`}
-            >
-              포토부스
-            </button>
-
-            <button
-              role="tab"
-              aria-selected={activeTab === 'meal'}
-              tabIndex={activeTab === 'meal' ? 0 : -1}
-              onClick={() => setActiveTab('meal')}
-              className={`py-3 text-sm font-medium rounded-lg text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400
-        ${activeTab === 'meal' ? 'bg-white shadow text-gray-900' : 'text-gray-600 hover:text-gray-800'}`}
-            >
-              식사
-            </button>
-
-            <button
-              role="tab"
-              aria-selected={activeTab === 'parking'}
-              tabIndex={activeTab === 'parking' ? 0 : -1}
-              onClick={() => setActiveTab('parking')}
-              className={`py-3 text-sm font-medium rounded-lg text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400
-        ${activeTab === 'parking' ? 'bg-white shadow text-gray-900' : 'text-gray-600 hover:text-gray-800'}`}
-            >
-              예식
-            </button>
-          </div>
-        </div> */}
         {/* Tab Tabs (Underline) */}
         <div className="w-full max-w-2xl mb-8">
           <div className="grid grid-cols-2">
