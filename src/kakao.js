@@ -157,7 +157,7 @@ export const shareKakao = async (options, apiKey) => {
       // 기본 방식 (sendDefault) - supports multiple buttons
       const buttons = options.buttons || [
         {
-          title: options.buttonTitle || '자세히 보기',
+          title: options.buttonTitle || '청접장 보기',
           link: {
             mobileWebUrl: currentUrl,
             webUrl: currentUrl,
@@ -170,8 +170,7 @@ export const shareKakao = async (options, apiKey) => {
         content: {
           title: options.title || '초대장',
           description: options.description || '초대장을 공유합니다.',
-          imageUrl:
-            options.imageUrl || `${window.location.origin}/img/intro.jpg`,
+          imageUrl: options.imageUrl || `${window.location.origin}/img/05.jpg`,
           link: {
             mobileWebUrl: currentUrl,
             webUrl: currentUrl,

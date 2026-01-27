@@ -496,30 +496,16 @@ function App() {
   const shareKakao = async () => {
     const apiKey =
       import.meta.env.VITE_KAKAO_JS_KEY || import.meta.env.VITE_KAKAO_API_KEY;
-    const currentUrl = window.location.href;
+    // 템플릿 ID: 환경 변수에서 가져오거나 기본값 사용
+    const templateId = import.meta.env.VITE_KAKAO_TEMPLATE_ID || '123425';
 
-    // sendDefault를 사용하여 버튼을 명시적으로 추가
+    // 템플릿 사용 (템플릿에 설정된 버튼이 자동으로 포함됨)
     const shareOptions = {
-      title: '김덕곤 ❤️ 구동민 결혼합니다',
-      description: '2026년 5월 16일 토요일 오후 3시 국립외교원',
-      imageUrl: `${window.location.origin}/img/05.jpg`,
-      url: currentUrl,
-      buttons: [
-        {
-          title: '청접장 보기',
-          link: {
-            mobileWebUrl: currentUrl,
-            webUrl: currentUrl,
-          },
-        },
-        {
-          title: '위치 보기',
-          link: {
-            mobileWebUrl: 'https://kko.to/ShScpPRLU4',
-            webUrl: 'https://kko.to/ShScpPRLU4',
-          },
-        },
-      ],
+      templateId: templateId,
+      templateArgs: {
+        // 템플릿에서 사용하는 인자가 있다면 여기에 추가
+        // 예: KEY: 'value'
+      },
     };
 
     const success = await shareKakaoAPI(shareOptions, apiKey);
