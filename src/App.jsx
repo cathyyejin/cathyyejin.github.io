@@ -110,8 +110,8 @@ function loadKakao(appkey) {
     const s = document.createElement('script');
     s.id = 'kakao-map-sdk';
     s.async = true;
-    // services 라이브러리(지오코더) 사용
-    s.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false&libraries=services`;
+    // services 라이브러리(지오코더) 사용, HTTPS 사용
+    s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false&libraries=services`;
     s.onload = onLoaded;
     s.onerror = reject;
     document.head.appendChild(s);
@@ -135,48 +135,80 @@ export function KakaoMap({
 
     let map, marker, info;
     let mounted = true;
+    let handleResize = null;
 
-    loadKakao(appkey).then((kakao) => {
-      if (!mounted || !ref.current) return;
+    loadKakao(appkey)
+      .then((kakao) => {
+        if (!mounted || !ref.current) return;
 
-      const center = new kakao.maps.LatLng(lat || 37.5665, lng || 126.978); // 기본: 서울시청
-      map = new kakao.maps.Map(ref.current, { center, level });
+        const center = new kakao.maps.LatLng(lat || 37.5665, lng || 126.978); // 기본: 서울시청
+        map = new kakao.maps.Map(ref.current, { center, level });
 
-      // 컨트롤(줌) 추가
-      const zoomControl = new kakao.maps.ZoomControl();
-      map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
-
-      const setMarkerWithInfo = (pos) => {
-        marker = new kakao.maps.Marker({ position: pos, map });
-        if (title) {
-          info = new kakao.maps.InfoWindow({
-            content: `<div style="padding:6px 8px;white-space:nowrap;">${title}</div>`,
-          });
-          info.open(map, marker);
-        }
-      };
-
-      if (address) {
-        const geocoder = new kakao.maps.services.Geocoder();
-        geocoder.addressSearch(address, (result, status) => {
-          if (!mounted) return;
-          if (status === kakao.maps.services.Status.OK && result[0]) {
-            const pos = new kakao.maps.LatLng(result[0].y, result[0].x);
-            map.setCenter(pos);
-            setMarkerWithInfo(pos);
-          } else {
-            // 주소 실패 시 기본 좌표 사용
-            setMarkerWithInfo(center);
-            // console.warn('주소를 좌표로 변환하지 못했습니다.');
+        // 모바일에서 지도가 제대로 표시되도록 relayout 호출
+        setTimeout(() => {
+          if (map && mounted) {
+            map.relayout();
           }
-        });
-      } else if (lat && lng) {
-        setMarkerWithInfo(center);
-      }
-    });
+        }, 100);
+
+        // 컨트롤(줌) 추가
+        const zoomControl = new kakao.maps.ZoomControl();
+        map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+
+        const setMarkerWithInfo = (pos) => {
+          if (!mounted) return;
+          marker = new kakao.maps.Marker({ position: pos, map });
+          if (title) {
+            info = new kakao.maps.InfoWindow({
+              content: `<div style="padding:6px 8px;white-space:nowrap;">${title}</div>`,
+            });
+            info.open(map, marker);
+          }
+          // 마커 추가 후에도 relayout 호출
+          setTimeout(() => {
+            if (map && mounted) {
+              map.relayout();
+            }
+          }, 50);
+        };
+
+        if (address) {
+          const geocoder = new kakao.maps.services.Geocoder();
+          geocoder.addressSearch(address, (result, status) => {
+            if (!mounted) return;
+            if (status === kakao.maps.services.Status.OK && result[0]) {
+              const pos = new kakao.maps.LatLng(result[0].y, result[0].x);
+              map.setCenter(pos);
+              setMarkerWithInfo(pos);
+            } else {
+              // 주소 실패 시 기본 좌표 사용
+              setMarkerWithInfo(center);
+              // console.warn('주소를 좌표로 변환하지 못했습니다.');
+            }
+          });
+        } else if (lat && lng) {
+          setMarkerWithInfo(center);
+        }
+
+        // 윈도우 리사이즈 시 지도 크기 조정
+        handleResize = () => {
+          if (map && mounted) {
+            map.relayout();
+          }
+        };
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
+      })
+      .catch((error) => {
+        console.error('Failed to load Kakao Map:', error);
+      });
 
     return () => {
       mounted = false;
+      if (handleResize) {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('orientationchange', handleResize);
+      }
     };
   }, [appkey, lat, lng, address, title, level]);
 
@@ -498,13 +530,20 @@ function App() {
       import.meta.env.VITE_KAKAO_JS_KEY || import.meta.env.VITE_KAKAO_API_KEY;
     // 템플릿 ID: 환경 변수에서 가져오거나 기본값 사용
     const templateId = import.meta.env.VITE_KAKAO_TEMPLATE_ID || '123425';
+    const currentUrl = window.location.href;
 
     // 템플릿 사용 (템플릿에 설정된 버튼이 자동으로 포함됨)
+    // 템플릿에서 ${KEY} 형식으로 사용하는 변수들을 여기에 매핑
+    // 예: 템플릿에 ${TITLE}이 있으면 TITLE: '값' 형태로 전달
     const shareOptions = {
       templateId: templateId,
       templateArgs: {
-        // 템플릿에서 사용하는 인자가 있다면 여기에 추가
-        // 예: KEY: 'value'
+        // 템플릿에서 사용하는 키를 여기에 추가하세요
+        // 예시 (템플릿에 실제로 사용하는 키에 맞게 수정):
+        // TITLE: '김덕곤 ❤️ 구동민 결혼합니다',
+        // DESCRIPTION: '2026년 5월 16일 토요일 오후 3시 국립외교원',
+        // IMAGE_URL: `${window.location.origin}/img/05.jpg`,
+        // LINK_URL: currentUrl,
       },
     };
 
