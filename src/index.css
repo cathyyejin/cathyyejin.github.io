@@ -99,11 +99,13 @@ html,
 body {
   height: 100%;
   overflow-x: hidden;
+  touch-action: manipulation;
 }
 
 body {
   overflow-y: auto;
   min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
 }
 
 #root {

@@ -1093,7 +1093,10 @@ function App() {
         {/* Map */}
         <div className="w-full max-w-2xl mb-8">
           <KakaoMap
-            appkey={import.meta.env.VITE_KAKAO_JS_KEY}
+            appkey={
+              import.meta.env.VITE_KAKAO_JS_KEY ||
+              import.meta.env.VITE_KAKAO_API_KEY
+            }
             // 방법 A: 주소로 표시 (지오코딩)
             address="서울 서초구 남부순환로 2572"
             title="국립외교원"
