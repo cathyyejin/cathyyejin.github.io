@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>위치 안내</title>
+
+    <!-- query param으로 받은 to= 를 지도 링크로 리다이렉트 -->
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const to = params.get("to");
+
+      if (to) {
+        window.location.replace(decodeURIComponent(to));
+      } else {
+        document.body.innerText = "유효하지 않은 위치 링크입니다.";
+      }
+    </script>
+  </head>
+  <body></body>
+</html>
