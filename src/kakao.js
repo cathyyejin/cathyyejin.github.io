@@ -143,6 +143,7 @@ export const shareKakao = async (options, apiKey) => {
 
     // 현재 URL 가져오기
     const currentUrl = options.url || window.location.href;
+    const mapUrl = 'https://kko.to/ShScpPRLU4';
 
     // 템플릿 ID가 있으면 템플릿 사용, 없으면 기본 방식
     if (options.templateId) {
@@ -185,6 +186,13 @@ export const shareKakao = async (options, apiKey) => {
           link: {
             mobileWebUrl: currentUrl,
             webUrl: currentUrl,
+          },
+        },
+        {
+          title: '위치보기',
+          link: {
+            mobileWebUrl: mapUrl,
+            webUrl: mapUrl,
           },
         },
       ];
