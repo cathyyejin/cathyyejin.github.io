@@ -211,10 +211,23 @@ export function KakaoMap({
           if (!mounted) return;
           marker = new kakao.maps.Marker({ position: pos, map });
           if (title) {
+            // Create a centered content div - the wrapper div from Kakao Maps will be absolute positioned
+            // but our content will be centered within it using flexbox
             info = new kakao.maps.InfoWindow({
-              content: `<div style="padding:6px 8px;white-space:nowrap;">${title}</div>`,
+              content: `<div style="padding:8px 12px;white-space:nowrap;text-align:center;font-weight:500;font-size:14px;color:#333;min-width:80px;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;margin:0 auto;">${title}</div>`,
+              removable: false, // Don't show close button
+              // Try to center the InfoWindow by adjusting its anchor point
+              // Note: Kakao Maps doesn't directly support anchor offset, but we can try
             });
             info.open(map, marker);
+            
+            // Center the map on the marker position
+            // The InfoWindow will appear above the marker by default
+            setTimeout(() => {
+              if (map && mounted) {
+                map.setCenter(pos);
+              }
+            }, 100);
           }
           // 마커 추가 후에도 relayout 호출
           setTimeout(() => {
@@ -738,6 +751,29 @@ function App() {
     // Prevent overscroll on html element (Android)
     document.documentElement.style.overflow = 'hidden';
     document.documentElement.style.overscrollBehavior = 'none';
+    document.documentElement.style.height = '100%';
+    
+    // Prevent touch events that cause bounce
+    const preventOverscroll = (e) => {
+      // Prevent elastic/bounce scrolling on iOS/Android
+      const target = e.target;
+      // Only prevent if scrolling the body/html, not the gallery scroller
+      if (target === document.body || target === document.documentElement || 
+          (!scrollerRef.current?.contains(target) && target.closest('.fixed.inset-0') === null)) {
+        // Check if this is a vertical scroll attempt
+        if (e.touches && e.touches.length === 1) {
+          const touch = e.touches[0];
+          // Allow if it's within the gallery scroller area
+          if (scrollerRef.current?.contains(target)) {
+            return; // Allow horizontal scrolling in gallery
+          }
+        }
+        e.preventDefault();
+      }
+    };
+    
+    // Add touch event listeners to prevent bounce
+    document.addEventListener('touchmove', preventOverscroll, { passive: false });
     
     // Cleanup scroll timeout on close
     return () => {
@@ -747,6 +783,10 @@ function App() {
       document.body.style.width = previousWidth || '';
       document.documentElement.style.overflow = '';
       document.documentElement.style.overscrollBehavior = '';
+      document.documentElement.style.height = '';
+      
+      // Remove event listeners
+      document.removeEventListener('touchmove', preventOverscroll);
       
       // Restore scroll position
       window.scrollTo(0, scrollY);
@@ -1266,10 +1306,20 @@ function App() {
         {/* Full screen image container */}
         <div
           className="relative w-full overflow-hidden"
-          style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+          style={{ 
+            height: 'calc(var(--vh, 1vh) * 100)',
+            overscrollBehavior: 'none',
+            touchAction: 'pan-y', // Allow vertical scroll but prevent bounce
+          }}
         >
           {/* Background image - full screen without cropping */}
-          <div className="absolute inset-0 bg-[url('/img/IMG_1519.jpg')] bg-contain bg-center bg-no-repeat" />
+          <div 
+            className="absolute inset-0 bg-[url('/img/IMG_1519.jpg')] bg-contain bg-center bg-no-repeat"
+            style={{
+              height: 'calc(var(--vh, 1vh) * 100)',
+              overscrollBehavior: 'none',
+            }}
+          />
         </div>
       </section>
 
@@ -1331,7 +1381,11 @@ function App() {
         {/* Centered container that matches the rest of your content width */}
         <div
           className="relative w-full max-w-2xl mx-auto overflow-hidden"
-          style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+          style={{ 
+            height: 'calc(var(--vh, 1vh) * 100)',
+            overscrollBehavior: 'none',
+            touchAction: 'pan-y', // Allow vertical scroll but prevent bounce
+          }}
         >
           {/* Image - contain to show full width, crop top/bottom slightly */}
           {/* <img
@@ -1339,7 +1393,13 @@ function App() {
             alt=""
             className="absolute inset-0 w-full h-[78%] object-contain object-center "
           /> */}
-          <div className="absolute inset-0 bg-[url('/img/02.jpg')] bg-cover bg-center" />
+          <div 
+            className="absolute inset-0 bg-[url('/img/02.jpg')] bg-cover bg-center"
+            style={{
+              height: 'calc(var(--vh, 1vh) * 100)',
+              overscrollBehavior: 'none',
+            }}
+          />
         </div>
       </section>
 
@@ -2268,10 +2328,20 @@ function App() {
         {/* Centered container that matches the rest of your content width */}
         <div
           className="relative w-full max-w-2xl mx-auto overflow-hidden"
-          style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+          style={{ 
+            height: 'calc(var(--vh, 1vh) * 100)',
+            overscrollBehavior: 'none',
+            touchAction: 'pan-y', // Allow vertical scroll but prevent bounce
+          }}
         >
           {/* Background image only inside the centered box */}
-          <div className="absolute inset-0 bg-[url('/img/08.jpg')] bg-cover bg-center" />
+          <div 
+            className="absolute inset-0 bg-[url('/img/08.jpg')] bg-cover bg-center"
+            style={{
+              height: 'calc(var(--vh, 1vh) * 100)',
+              overscrollBehavior: 'none',
+            }}
+          />
 
           {/* Bottom overlay with quote */}
           <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-neutral-900/90 via-neutral-900/70 to-transparent" />
@@ -2291,25 +2361,42 @@ function App() {
 
       {isGalleryOpen && (
         <div 
-          className="fixed inset-0 z-50"
+          className="fixed z-50"
           style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 'calc(var(--vh, 1vh) * 100)', // Lock height to prevent resize
+            width: '100%',
             overscrollBehavior: 'none',
             touchAction: 'pan-x',
+            overflow: 'hidden',
           }}
         >
           {/* Dim background (tap to close) */}
           <div
             className="absolute inset-0 bg-black/90"
             onClick={() => setIsGalleryOpen(false)}
-            style={{ touchAction: 'none' }}
+            style={{ 
+              touchAction: 'none',
+              overscrollBehavior: 'none',
+            }}
           />
 
           {/* Content */}
           <div 
-            className="absolute inset-0 flex flex-col"
+            className="absolute flex flex-col"
             style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 'calc(var(--vh, 1vh) * 100)', // Lock height
+              width: '100%',
               overscrollBehavior: 'none',
               touchAction: 'pan-x',
+              overflow: 'hidden',
             }}
           >
             {/* Top bar */}
@@ -2344,6 +2431,13 @@ function App() {
               // 안드로이드에서 가로 스와이프 시 세로 스크롤이 같이 움직이는 현상을 줄이기 위해
               // 이 영역에서는 가로(pan-x) 제스처만 허용
               style={{ 
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 'calc(var(--vh, 1vh) * 100)', // Lock height to prevent resize
+                width: '100%',
                 touchAction: 'pan-x', // Only allow horizontal panning
                 WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS/Android
                 scrollSnapType: 'x mandatory', // Force snap on Android
@@ -2351,15 +2445,27 @@ function App() {
                 overscrollBehavior: 'none', // Prevent bounce/overscroll
                 overscrollBehaviorX: 'none', // Prevent horizontal overscroll
                 overscrollBehaviorY: 'none', // Prevent vertical overscroll/bounce
+                overflowX: 'auto',
+                overflowY: 'hidden', // Completely prevent vertical scroll
               }}
-              className="hide-scrollbar flex h-full overflow-x-auto snap-x snap-mandatory"
+              className="hide-scrollbar flex snap-x snap-mandatory"
             >
               {images.map((src, i) => (
-                <div key={i} className="relative min-w-full h-full snap-center">
+                <div 
+                  key={i} 
+                  className="relative min-w-full snap-center flex-shrink-0"
+                  style={{
+                    height: 'calc(var(--vh, 1vh) * 100)', // Lock height
+                    width: '100%',
+                  }}
+                >
                   <img
                     src={src}
                     alt={`Gallery ${i + 1}`}
-                    className="absolute inset-0 w-full h-full object-contain object-center"
+                    className="w-full h-full object-contain object-center"
+                    style={{
+                      height: 'calc(var(--vh, 1vh) * 100)', // Lock image height
+                    }}
                     draggable={false}
                   />
                 </div>

@@ -100,6 +100,8 @@ body {
   height: 100%;
   overflow-x: hidden;
   touch-action: manipulation;
+  overscroll-behavior: none; /* Prevent bounce/overscroll on Android */
+  overscroll-behavior-y: none; /* Prevent vertical bounce */
 }
 
 /* Viewport height variable for preventing Android browser UI resize issues */
