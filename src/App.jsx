@@ -2184,22 +2184,22 @@ function App() {
       {isContactOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            className="absolute inset-0 bg-black/40 backdrop-blur-md"
             onClick={closeContact}
           />
-          <div className="relative w-full max-w-md max-h-[90vh] bg-gradient-to-b from-stone-900/95 via-stone-900/90 to-stone-800/90 text-white rounded-3xl shadow-2xl ring-1 ring-white/10 overflow-hidden flex flex-col my-auto">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 flex-shrink-0">
+          <div className="relative w-full max-w-md max-h-[90vh] bg-white text-gray-900 rounded-3xl shadow-2xl ring-1 ring-gray-200 overflow-hidden flex flex-col my-auto">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 flex-shrink-0">
               <div>
-                <div className="text-xs uppercase tracking-[0.3em] text-white/70">
+                {/* <div className="text-xs uppercase tracking-[0.3em] text-gray-500">
                   Contact
-                </div>
+                </div> */}
                 <div className="text-xl font-semibold">연락하기</div>
               </div>
               <button
                 type="button"
                 onClick={closeContact}
                 aria-label="닫기"
-                className="p-2 rounded-full hover:bg-white/10 transition"
+                className="p-2 rounded-full hover:bg-gray-100 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -2220,28 +2220,28 @@ function App() {
             <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1 min-h-0">
               {contactGroups.map((group) => (
                 <div key={group.title} className="space-y-2">
-                  <div className="text-xs uppercase tracking-[0.25em] text-white/70">
+                  <div className="text-xs uppercase tracking-[0.25em] text-gray-500">
                     {group.title}
                   </div>
-                  <div className="border-t border-white/15" />
+                  <div className="border-t border-gray-200" />
                   <div className="space-y-2">
                     {group.items.map((item) => (
                       <div
                         key={item.role + item.name}
-                        className="flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3 py-2"
+                        className="flex items-center justify-between gap-3 rounded-xl bg-gray-50 px-3 py-2"
                       >
                         <div>
-                          <div className="text-xs text-white/80">
+                          <div className="text-xs text-gray-600">
                             {item.role}
                           </div>
-                          <div className="text-base font-semibold">
+                          <div className="text-base font-semibold text-gray-900">
                             {item.name}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <a
                             href={`tel:${item.phone}`}
-                            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition"
+                            className="p-1.5 rounded-full bg-gray-200 hover:bg-gray-300 transition"
                             aria-label={`${item.name}에게 전화하기`}
                           >
                             <svg
