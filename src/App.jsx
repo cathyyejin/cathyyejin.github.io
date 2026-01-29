@@ -1313,12 +1313,20 @@ function App() {
           }}
         >
           {/* Background image - full screen without cropping */}
-          <div 
-            className="absolute inset-0 bg-[url('/img/IMG_1519.jpg')] bg-contain bg-center bg-no-repeat"
+          <img
+            src="/img/IMG_1519.jpg"
+            alt=""
+            className="absolute inset-0"
             style={{
+              objectFit: 'contain',
+              objectPosition: 'center',
               height: 'calc(var(--vh, 1vh) * 100)',
+              width: '100%',
+              maxWidth: '100%',
+              maxHeight: 'calc(var(--vh, 1vh) * 100)',
               overscrollBehavior: 'none',
             }}
+            draggable={false}
           />
         </div>
       </section>
@@ -1393,12 +1401,20 @@ function App() {
             alt=""
             className="absolute inset-0 w-full h-[78%] object-contain object-center "
           /> */}
-          <div 
-            className="absolute inset-0 bg-[url('/img/02.jpg')] bg-cover bg-center"
+          <img
+            src="/img/02.jpg"
+            alt=""
+            className="absolute inset-0"
             style={{
+              objectFit: 'cover',
+              objectPosition: 'center',
               height: 'calc(var(--vh, 1vh) * 100)',
+              width: '100%',
+              maxWidth: '100%',
+              maxHeight: 'calc(var(--vh, 1vh) * 100)',
               overscrollBehavior: 'none',
             }}
+            draggable={false}
           />
         </div>
       </section>
@@ -2335,12 +2351,20 @@ function App() {
           }}
         >
           {/* Background image only inside the centered box */}
-          <div 
-            className="absolute inset-0 bg-[url('/img/08.jpg')] bg-cover bg-center"
+          <img
+            src="/img/08.jpg"
+            alt=""
+            className="absolute inset-0"
             style={{
+              objectFit: 'cover',
+              objectPosition: 'center',
               height: 'calc(var(--vh, 1vh) * 100)',
+              width: '100%',
+              maxWidth: '100%',
+              maxHeight: 'calc(var(--vh, 1vh) * 100)',
               overscrollBehavior: 'none',
             }}
+            draggable={false}
           />
 
           {/* Bottom overlay with quote */}

@@ -118,3 +118,17 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* Prevent image stretching on Android browsers */
+img {
+  max-width: 100%;
+  height: auto;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
+/* Ensure images maintain aspect ratio */
+img[style*="object-fit"] {
+  image-rendering: auto;
+}
