@@ -2829,7 +2829,7 @@ function App() {
             <div className="flex-1 overflow-y-auto p-5 space-y-3">
               {posts.length === 0 && (
                 <div className="text-center text-gray-500">
-                  첫 번째 메시지를 남겨주세요!
+                  첫 번째 메시지를 남겨주세요
                 </div>
               )}
 
