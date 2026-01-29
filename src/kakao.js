@@ -161,12 +161,12 @@ export const shareKakao = async (options, apiKey) => {
         templateId: templateId,
       };
 
-      // templateArgs가 있고 비어있지 않으면 추가
-      if (
-        options.templateArgs &&
-        Object.keys(options.templateArgs).length > 0
-      ) {
+      // templateArgs가 있으면 항상 추가 (빈 객체여도 추가)
+      if (options.templateArgs) {
         customOptions.templateArgs = options.templateArgs;
+        console.log('Template Args being sent:', JSON.stringify(options.templateArgs));
+      } else {
+        console.warn('No templateArgs provided, but template may require them');
       }
 
       // serverCallbackArgs가 있으면 추가
@@ -177,8 +177,17 @@ export const shareKakao = async (options, apiKey) => {
         customOptions.serverCallbackArgs = options.serverCallbackArgs;
       }
 
-      console.log('Kakao Share Custom Options:', customOptions);
-      window.Kakao.Share.sendCustom(customOptions);
+      console.log('Kakao Share Custom Options:', JSON.stringify(customOptions, null, 2));
+      console.log('Template ID:', templateId);
+      console.log('Template Args:', customOptions.templateArgs);
+      
+      try {
+        window.Kakao.Share.sendCustom(customOptions);
+        console.log('✅ Kakao Share sendCustom called successfully');
+      } catch (error) {
+        console.error('❌ Error calling Kakao.Share.sendCustom:', error);
+        throw error;
+      }
     } else {
       // 기본 방식 (sendDefault) - supports multiple buttons
       const buttons = options.buttons || [

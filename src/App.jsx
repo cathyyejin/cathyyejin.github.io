@@ -450,6 +450,61 @@ function App() {
     }
   }, [isMuted]);
 
+  // Stop music when page is closed or hidden (especially important for mobile)
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const stopMusic = () => {
+      if (audio && !audio.paused) {
+        audio.pause();
+        audio.currentTime = 0; // Reset to beginning
+        console.log('Music stopped - page closing/hidden');
+      }
+    };
+
+    // Stop music when page becomes hidden (works on mobile when browser is closed)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopMusic();
+      }
+    };
+
+    // Stop music when page is being unloaded
+    const handleBeforeUnload = () => {
+      stopMusic();
+    };
+
+    // Stop music when page is hidden (mobile browsers)
+    const handlePageHide = () => {
+      stopMusic();
+    };
+
+    // Stop music when window loses focus (fallback)
+    const handleBlur = () => {
+      // Only stop if page is actually hidden (not just tab switch on desktop)
+      if (document.hidden) {
+        stopMusic();
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('blur', handleBlur);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('blur', handleBlur);
+      // Also stop music on cleanup (component unmount)
+      stopMusic();
+    };
+  }, []);
+
   // Load messages from database on mount
   useEffect(() => {
     const loadMessages = async () => {
@@ -799,14 +854,14 @@ function App() {
     // 사용자 정의 템플릿 사용 (Feed 템플릿)
     // 템플릿에 설정된 버튼이 자동으로 포함됨
     // 템플릿에서 ${KEY} 형식으로 사용하는 변수가 있다면 templateArgs에 추가
+    // 중요: 템플릿에서 사용하는 변수명과 정확히 일치해야 함 (대소문자 구분)
     const shareOptions = {
       templateId: templateId,
       templateArgs: {
-        // 템플릿에서 사용하는 키를 여기에 추가하세요
-        // 예: 템플릿에 ${TITLE}이 있으면 TITLE: '값' 형태로 전달
-        // TITLE: '김덕곤 ❤️ 구동민 결혼합니다',
-        // DESC: '2026년 5월 16일 토요일 오후 3시 국립외교원',
+        // 템플릿에서 ${mapUrl}로 사용하는 경우
         mapUrl: 'https://kko.to/ShScpPRLU4',
+        // 만약 템플릿에서 다른 이름을 사용한다면 여기에 추가:
+        // 예: MAP_URL, map_url, MapUrl 등
       },
     };
 
