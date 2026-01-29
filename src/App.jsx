@@ -722,12 +722,35 @@ function App() {
   // 안드로이드에서 가로 스와이프 시 페이지 세로 스크롤이 같이 되는 현상을 줄임
   useEffect(() => {
     if (!isGalleryOpen) return;
+    
     const previousOverflow = document.body.style.overflow;
+    const previousPosition = document.body.style.position;
+    const previousTop = document.body.style.top;
+    const previousWidth = document.body.style.width;
+    const scrollY = window.scrollY;
+    
+    // Prevent body scroll and overscroll bounce
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    
+    // Prevent overscroll on html element (Android)
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overscrollBehavior = 'none';
     
     // Cleanup scroll timeout on close
     return () => {
       document.body.style.overflow = previousOverflow || '';
+      document.body.style.position = previousPosition || '';
+      document.body.style.top = previousTop || '';
+      document.body.style.width = previousWidth || '';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.overscrollBehavior = '';
+      
+      // Restore scroll position
+      window.scrollTo(0, scrollY);
+      
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
@@ -2267,15 +2290,28 @@ function App() {
       </section>
 
       {isGalleryOpen && (
-        <div className="fixed inset-0 z-50">
+        <div 
+          className="fixed inset-0 z-50"
+          style={{
+            overscrollBehavior: 'none',
+            touchAction: 'pan-x',
+          }}
+        >
           {/* Dim background (tap to close) */}
           <div
             className="absolute inset-0 bg-black/90"
             onClick={() => setIsGalleryOpen(false)}
+            style={{ touchAction: 'none' }}
           />
 
           {/* Content */}
-          <div className="absolute inset-0 flex flex-col">
+          <div 
+            className="absolute inset-0 flex flex-col"
+            style={{
+              overscrollBehavior: 'none',
+              touchAction: 'pan-x',
+            }}
+          >
             {/* Top bar */}
             <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
               <button
@@ -2312,6 +2348,9 @@ function App() {
                 WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS/Android
                 scrollSnapType: 'x mandatory', // Force snap on Android
                 scrollBehavior: 'smooth',
+                overscrollBehavior: 'none', // Prevent bounce/overscroll
+                overscrollBehaviorX: 'none', // Prevent horizontal overscroll
+                overscrollBehaviorY: 'none', // Prevent vertical overscroll/bounce
               }}
               className="hide-scrollbar flex h-full overflow-x-auto snap-x snap-mandatory"
             >
