@@ -616,19 +616,106 @@ function App() {
   };
 
   const scrollerRef = useRef(null);
+  const scrollTimeoutRef = useRef(null);
+  const isScrollingRef = useRef(false);
+  const touchStartXRef = useRef(0);
+  const touchStartScrollLeftRef = useRef(0);
 
   const scrollToIndex = (i) => {
     const el = scrollerRef.current;
     if (!el) return;
-    el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
+    const targetScroll = i * el.clientWidth;
+    el.scrollTo({ left: targetScroll, behavior: 'smooth' });
+    setCurrentImage(i);
+  };
+
+  // Snap to nearest image - more aggressive for Android
+  const snapToNearest = (immediate = false) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    
+    const scrollLeft = el.scrollLeft;
+    const itemWidth = el.clientWidth;
+    
+    if (itemWidth === 0) return; // Element not ready
+    
+    const nearestIndex = Math.max(0, Math.min(
+      Math.round(scrollLeft / itemWidth),
+      images.length - 1
+    ));
+    const targetScroll = nearestIndex * itemWidth;
+    
+    // Always snap if not at target (more aggressive for Android)
+    if (Math.abs(scrollLeft - targetScroll) > 1) {
+      // Use instant scroll for immediate snapping, smooth for programmatic
+      el.scrollTo({ 
+        left: targetScroll, 
+        behavior: immediate ? 'auto' : 'smooth' 
+      });
+    }
+    
+    if (nearestIndex !== currentImage) {
+      setCurrentImage(nearestIndex);
+    }
+    
+    isScrollingRef.current = false;
+  };
+
+  // Handle touch start to track swipe
+  const handleTouchStart = (e) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartScrollLeftRef.current = el.scrollLeft;
+    isScrollingRef.current = true;
+    
+    // Clear any pending snap
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+  };
+
+  // Handle touch end - snap immediately
+  const handleTouchEnd = (e) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    
+    // Small delay to let momentum scrolling settle, then snap
+    setTimeout(() => {
+      snapToNearest(true); // Immediate snap
+    }, 50);
   };
 
   // keep currentImage in sync while the user scrolls
   const onScrollSnap = () => {
     const el = scrollerRef.current;
     if (!el) return;
-    const idx = Math.round(el.scrollLeft / el.clientWidth);
-    if (idx !== currentImage) setCurrentImage(idx);
+    
+    isScrollingRef.current = true;
+    
+    // Clear any existing timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    // Update current image index during scroll
+    const scrollLeft = el.scrollLeft;
+    const itemWidth = el.clientWidth;
+    
+    if (itemWidth > 0) {
+      const idx = Math.max(0, Math.min(
+        Math.round(scrollLeft / itemWidth),
+        images.length - 1
+      ));
+      if (idx !== currentImage && idx >= 0 && idx < images.length) {
+        setCurrentImage(idx);
+      }
+    }
+    
+    // After scroll ends, snap to nearest image (important for Android)
+    scrollTimeoutRef.current = setTimeout(() => {
+      snapToNearest(true); // Use immediate snap
+    }, 100); // Reduced timeout for faster snapping
   };
 
   // 갤러리 전체보기 모달이 열려 있을 때는 배경 스크롤을 막아서
@@ -637,8 +724,13 @@ function App() {
     if (!isGalleryOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    
+    // Cleanup scroll timeout on close
     return () => {
       document.body.style.overflow = previousOverflow || '';
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
     };
   }, [isGalleryOpen]);
 
@@ -855,15 +947,21 @@ function App() {
     // 템플릿에 설정된 버튼이 자동으로 포함됨
     // 템플릿에서 ${KEY} 형식으로 사용하는 변수가 있다면 templateArgs에 추가
     // 중요: 템플릿에서 사용하는 변수명과 정확히 일치해야 함 (대소문자 구분)
+    const mapUrlValue = 'https://kko.to/ShScpPRLU4';
     const shareOptions = {
       templateId: templateId,
       templateArgs: {
-        // 템플릿에서 ${mapUrl}로 사용하는 경우
-        mapUrl: 'https://kko.to/ShScpPRLU4',
-        // 만약 템플릿에서 다른 이름을 사용한다면 여기에 추가:
-        // 예: MAP_URL, map_url, MapUrl 등
+        // 템플릿에서 ${mapUrl}로 사용하는 경우 (가장 일반적)
+        mapUrl: mapUrlValue,
+        // 다른 가능한 변수명들도 함께 전달 (템플릿에서 사용하는 이름에 맞춰 하나만 작동)
+        // 주석 처리된 것들은 필요시 활성화:
+        // map_url: mapUrlValue,
+        // MAP_URL: mapUrlValue,
+        // MapUrl: mapUrlValue,
       },
     };
+    
+    console.log('Map URL being sent:', mapUrlValue);
 
     console.log('Sharing with Feed template ID:', templateId);
     console.log('Share options:', shareOptions);
@@ -2205,10 +2303,17 @@ function App() {
             <div
               ref={scrollerRef}
               onScroll={onScrollSnap}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
               // 안드로이드에서 가로 스와이프 시 세로 스크롤이 같이 움직이는 현상을 줄이기 위해
               // 이 영역에서는 가로(pan-x) 제스처만 허용
-              style={{ touchAction: 'pan-x' }}
-              className="hide-scrollbar flex h-full overflow-x-auto snap-x snap-mandatory scroll-smooth"
+              style={{ 
+                touchAction: 'pan-x', // Only allow horizontal panning
+                WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS/Android
+                scrollSnapType: 'x mandatory', // Force snap on Android
+                scrollBehavior: 'smooth',
+              }}
+              className="hide-scrollbar flex h-full overflow-x-auto snap-x snap-mandatory"
             >
               {images.map((src, i) => (
                 <div key={i} className="relative min-w-full h-full snap-center">
