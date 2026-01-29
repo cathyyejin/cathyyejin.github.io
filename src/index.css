@@ -102,6 +102,11 @@ body {
   touch-action: manipulation;
 }
 
+/* Viewport height variable for preventing Android browser UI resize issues */
+:root {
+  --vh: 1vh; /* Fallback, will be set by JavaScript */
+}
+
 body {
   overflow-y: auto;
   min-height: 100vh;

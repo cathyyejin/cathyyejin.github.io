@@ -1,6 +1,12 @@
 import './App.css';
 import { useState, useEffect, useRef } from 'react';
 import { shareKakao as shareKakaoAPI } from './kakao';
+import {
+  fetchMessages,
+  addMessage,
+  updateMessage,
+  deleteMessage,
+} from './db';
 
 function Toast({ open, message, type, onClose, position = 'bottom' }) {
   const color = type === 'error' ? 'bg-rose-600' : 'bg-emerald-600';
@@ -251,6 +257,58 @@ function App() {
     return () => clearTimeout(toastTimerRef.current);
   }, []);
 
+  // Load messages from database on mount
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        setIsLoadingPosts(true);
+        const messages = await fetchMessages();
+        setPosts(messages);
+      } catch (error) {
+        console.error('Failed to load messages:', error);
+        showToast('메시지를 불러오는데 실패했습니다.', 'error');
+      } finally {
+        setIsLoadingPosts(false);
+      }
+    };
+
+    loadMessages();
+  }, []);
+
+  // Lock viewport height to prevent image resizing when Android browser UI shows/hides
+  useEffect(() => {
+    const setViewportHeight = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    // Set initial height
+    setViewportHeight();
+
+    // Update on resize (but don't update on scroll to prevent resizing when address bar hides)
+    let resizeTimer;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        // Only update if the change is significant (more than 50px)
+        // This prevents small adjustments when address bar shows/hides
+        const currentVh = parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue('--vh')
+        );
+        const newVh = window.innerHeight * 0.01;
+        if (Math.abs(currentVh - newVh) > 0.5) {
+          setViewportHeight();
+        }
+      }, 150);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimer);
+    };
+  }, []);
+
   // Countdown to wedding day
   useEffect(() => {
     const target = new Date('2026-05-16T11:30:00+09:00'); // KST 기준 2026-05-16 11:"30"
@@ -324,6 +382,17 @@ function App() {
     const idx = Math.round(el.scrollLeft / el.clientWidth);
     if (idx !== currentImage) setCurrentImage(idx);
   };
+
+  // 갤러리 전체보기 모달이 열려 있을 때는 배경 스크롤을 막아서
+  // 안드로이드에서 가로 스와이프 시 페이지 세로 스크롤이 같이 되는 현상을 줄임
+  useEffect(() => {
+    if (!isGalleryOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow || '';
+    };
+  }, [isGalleryOpen]);
 
   // Scroll to selected image when gallery opens
   useEffect(() => {
@@ -544,11 +613,13 @@ function App() {
         // 예: 템플릿에 ${TITLE}이 있으면 TITLE: '값' 형태로 전달
         // TITLE: '김덕곤 ❤️ 구동민 결혼합니다',
         // DESC: '2026년 5월 16일 토요일 오후 3시 국립외교원',
+        mapUrl: 'https://kko.to/ShScpPRLU4',
       },
     };
 
     console.log('Sharing with Feed template ID:', templateId);
     console.log('Share options:', shareOptions);
+    console.log('ENV KEY:', import.meta.env.VITE_KAKAO_JS_KEY);
 
     const success = await shareKakaoAPI(shareOptions, apiKey);
 
@@ -613,50 +684,12 @@ function App() {
     }
   };
   // --- Guest book state (mobile + modal) ---
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      name: '하객 A',
-      content: '두 분 행복하세요 ✨',
-      createdAt: new Date().toISOString(),
-      pin: '1234',
-    },
-    {
-      id: 2,
-      name: '하객 A',
-      content: '두 분 행복하세요 ✨',
-      createdAt: new Date().toISOString(),
-      pin: '1234',
-    },
-    {
-      id: 3,
-      name: '하객 A',
-      content: '두 분 행복하세요 ✨',
-      createdAt: new Date().toISOString(),
-      pin: '1234',
-    },
-    {
-      id: 4,
-      name: '하객 A',
-      content: '두 분 행복하세요 ✨',
-      createdAt: new Date().toISOString(),
-      pin: '1234',
-    },
-    {
-      id: 5,
-      name: '하객 A',
-      content: '두 분 행복하세요 ✨',
-      createdAt: new Date().toISOString(),
-      pin: '1234',
-    },
-    {
-      id: 6,
-      name: '하객 A',
-      content: '두 분 행복하세요 ✨',
-      createdAt: new Date().toISOString(),
-      pin: '1234',
-    },
-  ]);
+  // helpers for 4-digit PIN (defined before use)
+  const digits4 = (v) => v.replace(/\D/g, '').slice(0, 4);
+  const is4Digits = (v) => /^\d{4}$/.test(v);
+
+  const [posts, setPosts] = useState([]);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const PAGE_SIZE = 5; // how many posts per page
   const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
@@ -759,22 +792,24 @@ function App() {
   //   setPosts((prev) => [newPost, ...prev])
   //   closeWrite()
   // }
-  const submitWrite = (e) => {
+  const submitWrite = async (e) => {
     e.preventDefault();
     if (!canSubmit) return;
-    const newPost = {
-      id: Date.now(),
-      name: gbName.trim(),
-      content: gbContent.trim(),
-      pin: gbPassword, // save the 4-digit PIN with the post
-      createdAt: new Date().toISOString(),
-    };
-    setPosts((prev) => [newPost, ...prev]);
-    closeWrite();
+
+    try {
+      const newPost = await addMessage({
+        name: gbName.trim(),
+        content: gbContent.trim(),
+        pin: gbPassword,
+      });
+      setPosts((prev) => [newPost, ...prev]);
+      closeWrite();
+      showToast('메시지가 등록되었습니다!', 'success');
+    } catch (error) {
+      console.error('Failed to add message:', error);
+      showToast('메시지 등록에 실패했습니다.', 'error');
+    }
   };
-  // helpers for 4-digit PIN
-  const digits4 = (v) => v.replace(/\D/g, '').slice(0, 4);
-  const is4Digits = (v) => /^\d{4}$/.test(v);
 
   // password auth modal (for edit/delete)
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -816,7 +851,10 @@ function App() {
       {/* Full-Screen Banner */}
       <section className="w-full">
         {/* Full screen image container */}
-        <div className="relative h-[100dvh] w-full overflow-hidden">
+        <div
+          className="relative w-full overflow-hidden"
+          style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+        >
           {/* Background image - full screen without cropping */}
           <div className="absolute inset-0 bg-[url('/img/IMG_1519.jpg')] bg-contain bg-center bg-no-repeat" />
         </div>
@@ -876,7 +914,10 @@ function App() {
       {/* Image */}
       <section className="w-full">
         {/* Centered container that matches the rest of your content width */}
-        <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
+        <div
+          className="relative w-full max-w-2xl mx-auto overflow-hidden"
+          style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+        >
           {/* Image - contain to show full width, crop top/bottom slightly */}
           {/* <img
             src="/img/02.jpg"
@@ -1328,11 +1369,15 @@ function App() {
         </div>
         {/* Posts list */}
         <div className="w-full max-w-md space-y-3 mt-4">
-          {posts.length === 0 && (
+          {isLoadingPosts ? (
+            <div className="text-center text-gray-500 py-8">
+              메시지를 불러오는 중...
+            </div>
+          ) : posts.length === 0 ? (
             <div className="text-center text-gray-500">
               첫 번째 메시지를 남겨주세요!
             </div>
-          )}
+          ) : null}
           {displayPosts.map((p) => (
             <article
               key={p.id}
@@ -1355,7 +1400,7 @@ function App() {
                   삭제
                 </button>
                 <time className="text-xs text-gray-400" dateTime={p.createdAt}>
-                  {new Date(p.createdAt).toLocaleString()}
+                  {new Date(p.createdAt).toLocaleDateString()}
                 </time>
               </div>
               <p className="mt-2 text-gray-800 whitespace-pre-wrap">
@@ -1393,7 +1438,7 @@ function App() {
                   className="text-[11px] text-gray-400"
                   dateTime={p.createdAt}
                 >
-                  {new Date(p.createdAt).toLocaleString()}
+                  {new Date(p.createdAt).toLocaleDateString()}
                 </time>
               </div>
             </article>
@@ -1500,16 +1545,9 @@ function App() {
             {showAll ? '페이지 보기' : '전체보기'}
           </button>
         </div> */}
-        <div className="mt-2 w-full max-w-md mx-auto">
-          <button
-            type="button"
-            onClick={() => setIsAllOpen(true)}
-            className="w-full h-11 rounded-lg text-sm bg-gray-50 hover:bg-gray-100 text-gray-700"
-          >
-            모두 보기
-          </button>
-        </div>
       </section>
+
+      {/* Account Section */}
       <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
         <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
           ACCOUNT
@@ -1801,7 +1839,10 @@ function App() {
       {/* Closing Image + Quote */}
       <section className="w-full">
         {/* Centered container that matches the rest of your content width */}
-        <div className="relative h-screen w-full max-w-2xl mx-auto overflow-hidden">
+        <div
+          className="relative w-full max-w-2xl mx-auto overflow-hidden"
+          style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+        >
           {/* Background image only inside the centered box */}
           <div className="absolute inset-0 bg-[url('/img/08.jpg')] bg-cover bg-center" />
 
@@ -1858,6 +1899,9 @@ function App() {
             <div
               ref={scrollerRef}
               onScroll={onScrollSnap}
+              // 안드로이드에서 가로 스와이프 시 세로 스크롤이 같이 움직이는 현상을 줄이기 위해
+              // 이 영역에서는 가로(pan-x) 제스처만 허용
+              style={{ touchAction: 'pan-x' }}
               className="hide-scrollbar flex h-full overflow-x-auto snap-x snap-mandatory scroll-smooth"
             >
               {images.map((src, i) => (
@@ -2101,7 +2145,7 @@ function App() {
             </div>
 
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
                 if (!authPost || authPin !== authPost.pin) {
                   setAuthError('비밀번호가 일치하지 않습니다.');
@@ -2109,7 +2153,14 @@ function App() {
                 }
                 setIsAuthOpen(false);
                 if (authMode === 'delete') {
-                  setPosts((prev) => prev.filter((p) => p.id !== authPost.id));
+                  try {
+                    await deleteMessage(authPost.id);
+                    setPosts((prev) => prev.filter((p) => p.id !== authPost.id));
+                    showToast('메시지가 삭제되었습니다.', 'success');
+                  } catch (error) {
+                    console.error('Failed to delete message:', error);
+                    showToast('메시지 삭제에 실패했습니다.', 'error');
+                  }
                 } else if (authMode === 'edit') {
                   setEditName(authPost.name || '');
                   setEditContent(authPost.content || '');
@@ -2168,20 +2219,22 @@ function App() {
           />
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl ring-1 ring-black/5 max-h-[85vh] overflow-y-auto">
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                setPosts((prev) =>
-                  prev.map((p) =>
-                    p.id === authPost.id
-                      ? {
-                          ...p,
-                          name: editName.trim(),
-                          content: editContent.trim(),
-                        }
-                      : p
-                  )
-                );
-                setIsEditOpen(false);
+                try {
+                  const updated = await updateMessage(authPost.id, {
+                    name: editName.trim(),
+                    content: editContent.trim(),
+                  });
+                  setPosts((prev) =>
+                    prev.map((p) => (p.id === authPost.id ? updated : p))
+                  );
+                  setIsEditOpen(false);
+                  showToast('메시지가 수정되었습니다.', 'success');
+                } catch (error) {
+                  console.error('Failed to update message:', error);
+                  showToast('메시지 수정에 실패했습니다.', 'error');
+                }
               }}
               className="p-5"
             >
@@ -2369,7 +2422,7 @@ function App() {
                       className="text-[11px] text-gray-400"
                       dateTime={p.createdAt}
                     >
-                      {new Date(p.createdAt).toLocaleString()}
+                      {new Date(p.createdAt).toLocaleDateString()}
                     </time>
                   </div>
                 </article>

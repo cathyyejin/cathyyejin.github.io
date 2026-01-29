@@ -133,6 +133,7 @@ export const shareKakao = async (options, apiKey) => {
       console.error('Kakao API key is required');
       return false;
     }
+    console.log('[shareKakao] options =', JSON.stringify(options));
 
     // SDK 초기화
     const initialized = await initKakao(key);
