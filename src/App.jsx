@@ -8,6 +8,52 @@ import {
   deleteMessage,
 } from './db';
 
+// Scroll animation component
+function ScrollFadeIn({ children, delay = 0, className = '' }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          // Optionally disconnect after first animation
+          // observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of element is visible
+        rootMargin: '0px 0px -50px 0px', // Start animation slightly before element is fully visible
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`w-full flex flex-col items-center transition-all duration-1000 ease-out ${
+        isVisible
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-16'
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function Toast({ open, message, type, onClose, position = 'bottom' }) {
   const color = type === 'error' ? 'bg-rose-600' : 'bg-emerald-600';
 
@@ -235,6 +281,11 @@ function App() {
     seconds: 0,
   });
 
+  // Background music
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef(null);
+  const hasTriedAutoplayRef = useRef(false);
+
   // 토스트
   const [toast, setToast] = useState({
     open: false,
@@ -256,6 +307,148 @@ function App() {
   useEffect(() => {
     return () => clearTimeout(toastTimerRef.current);
   }, []);
+
+  // Background music setup and autoplay
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Load mute preference from localStorage
+    const savedMuteState = localStorage.getItem('musicMuted');
+    const shouldBeMuted = savedMuteState === 'true';
+    setIsMuted(shouldBeMuted);
+
+    // Set volume
+    audio.volume = 0.5;
+
+    // Handle audio events
+    const handleEnded = () => {
+      // Loop the music
+      audio.currentTime = 0;
+      if (!isMuted) {
+        audio.play().catch(() => {
+          // Autoplay blocked
+        });
+      }
+    };
+    const handleError = (e) => {
+      console.warn('Music file not found or failed to load:', e);
+    };
+
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+
+    // Try to autoplay on mount (browsers may block this)
+    const tryAutoplay = async () => {
+      if (!shouldBeMuted && !hasTriedAutoplayRef.current) {
+        hasTriedAutoplayRef.current = true;
+        try {
+          await audio.play();
+          console.log('✅ Music autoplay successful');
+        } catch (error) {
+          console.log('⚠️¢ Autoplay blocked by browser. Will try on user interaction.');
+        }
+      }
+    };
+
+    // Try autoplay after a short delay
+    setTimeout(tryAutoplay, 300);
+
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  // Try to p lay music on first user interaction (click, scroll, touch, etc.)
+  useEffect(() => {
+    if (isMuted) return;
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // If already playing, don't do anything
+    if (!audio.paused) return;
+
+    let hasStarted = false;
+
+    const tryPlayOnInteraction = async () => {
+      if (hasStarted || isMuted) return;
+      
+      if (audio.paused) {
+        try {
+          hasStarted = true;
+          await audio.play();
+          console.log('✅ Music started on user interaction');
+        } catch (error) {
+          console.error('Failed to play music on interaction:', error);
+          hasStarted = false; // Reset so it can try again
+        }
+      }
+    };
+
+    // Listen for various user interactions - use capture phase for better reliability
+    const events = ['click', 'touchstart', 'scroll', 'keydown', 'mousedown', 'pointerdown'];
+    
+    // Add listeners with capture phase for better reliability
+    events.forEach((event) => {
+      document.addEventListener(event, tryPlayOnInteraction, { 
+        once: false, // Don't use once, so it can retry if needed
+        passive: true,
+        capture: true 
+      });
+    });
+
+    // Also try on window focus (in case user switches tabs)
+    window.addEventListener('focus', tryPlayOnInteraction, { once: true });
+
+    return () => {
+      events.forEach((event) => {
+        document.removeEventListener(event, tryPlayOnInteraction, { capture: true });
+      });
+      window.removeEventListener('focus', tryPlayOnInteraction);
+    };
+  }, [isMuted]);
+
+  // Toggle mute/unmute
+  const toggleMute = async () => {
+    if (!audioRef.current) return;
+
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    localStorage.setItem('musicMuted', newMutedState.toString());
+
+    if (newMutedState) {
+      // Mute: pause the audio
+      audioRef.current.pause();
+    } else {
+      // Unmute: play the audio
+      try {
+        await audioRef.current.play();
+      } catch (error) {
+        console.error('Error playing music:', error);
+        showToast('음악을 재생할 수 없습니다.', 'error');
+      }
+    }
+  };
+
+  // Update audio playback based on mute state
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isMuted) {
+      audio.pause();
+    } else {
+      // Try to play if not already playing
+      if (audio.paused) {
+        audio.play().catch((error) => {
+          // Autoplay blocked - will play on user interaction
+          console.log('Music will start on next user interaction');
+        });
+      }
+    }
+  }, [isMuted]);
 
   // Load messages from database on mount
   useEffect(() => {
@@ -848,6 +1041,50 @@ function App() {
 
   return (
     <div className="w-full">
+      {/* Background Music */}
+      <audio
+        ref={audioRef}
+        src="/music/background.mp3"
+        loop
+        preload="auto"
+        style={{ display: 'none' }}
+      />
+
+      {/* Floating Mute/Unmute Button */}
+      <button
+        onClick={toggleMute}
+        // className="fixed top-6 right-6 z-40 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all hover:scale-110 flex items-center justify-center group"
+        className="fixed top-6 right-6 z-40 w-12 h-12 transition-all hover:scale-110 flex items-center justify-center group"
+
+        aria-label={isMuted ? '음악 켜기' : '음악 끄기'}
+        title={isMuted ? '음악 켜기' : '음악 끄기'}
+      >
+        {isMuted ? (
+          // Muted icon (sound off)
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-6 h-6 text-gray-700"
+            fill="currentColor"
+          >
+            <path d="M11.38,4.08a1,1,0,0,0-1.09.21L6.59,8H4a2,2,0,0,0-2,2v4a2,2,0,0,0,2,2H6.59l3.7,3.71A1,1,0,0,0,11,20a.84.84,0,0,0,.38-.08A1,1,0,0,0,12,19V5A1,1,0,0,0,11.38,4.08Z" />
+            <path d="M16,15.5a1,1,0,0,1-.71-.29,1,1,0,0,1,0-1.42l5-5a1,1,0,0,1,1.42,1.42l-5,5A1,1,0,0,1,16,15.5Z" />
+            <path d="M21,15.5a1,1,0,0,1-.71-.29l-5-5a1,1,0,0,1,1.42-1.42l5,5a1,1,0,0,1,0,1.42A1,1,0,0,1,21,15.5Z" />
+          </svg>
+        ) : (
+          // Unmuted icon (sound on)
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-6 h-6 text-gray-700"
+            fill="currentColor"
+          >
+            <path d="M18.36,19.36a1,1,0,0,1-.7-.29,1,1,0,0,1,0-1.41,8,8,0,0,0,0-11.32,1,1,0,0,1,1.41-1.41,10,10,0,0,1,0,14.14A1,1,0,0,1,18.36,19.36Z" />
+            <path d="M15.54,16.54a1,1,0,0,1-.71-.3,1,1,0,0,1,0-1.41,4,4,0,0,0,0-5.66,1,1,0,0,1,1.41-1.41,6,6,0,0,1,0,8.48A1,1,0,0,1,15.54,16.54Z" />
+            <path d="M11.38,4.08a1,1,0,0,0-1.09.21L6.59,8H4a2,2,0,0,0-2,2v4a2,2,0,0,0,2,2H6.59l3.7,3.71A1,1,0,0,0,11,20a.84.84,0,0,0,.38-.08A1,1,0,0,0,12,19V5A1,1,0,0,0,11.38,4.08Z" />
+          </svg>
+        )}
+      </button>
       {/* Full-Screen Banner */}
       <section className="w-full">
         {/* Full screen image container */}
@@ -862,53 +1099,55 @@ function App() {
 
       {/* Scrollable Content Below Banner */}
       <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 pb-16 pt-36">
-        {/* INVITATION */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
-          INVITATION
-        </span>
+        <ScrollFadeIn delay={0}>
+          {/* INVITATION */}
+          <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
+            INVITATION
+          </span>
 
-        {/* Main Heading */}
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-          소중한 분들을 초대합니다
-        </h2>
+          {/* Main Heading */}
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+            소중한 분들을 초대합니다
+          </h2>
 
-        {/* Multiline Quote */}
-        <div className="text-center text-base text-gray-700 mb-6 leading-relaxed whitespace-pre-line">
-          함께 있을 때 가장 나다운 모습이 되고,
-          <br />
-          함께 있을 때 미래를 꿈꾸게 하는 사람을 만나
-          <br />
-          함께 맞는 여덟 번째 봄, 결혼합니다.
-          <br />
-          지금처럼 서로의 가장 친한 친구가 되어
-          <br />
-          예쁘고 행복하게 잘 살겠습니다.
-          <br />
-          <br />
-          저희의 새로운 시작을 따뜻한 마음으로
-          <br />
-          함께 축복해 주세요.
-        </div>
-
-        {/* Names and Family Info */}
-        <div className="mb-6 text-center text-lg text-gray-900">
-          <div className="mb-1">
-            김기훈 · 김순희 <span className="text-gray-600">의 아들</span>{' '}
-            <span className="font-bold">덕곤</span>
+          {/* Multiline Quote */}
+          <div className="text-center text-base text-gray-700 mb-6 leading-relaxed whitespace-pre-line">
+            함께 있을 때 가장 나다운 모습이 되고,
+            <br />
+            함께 있을 때 미래를 꿈꾸게 하는 사람을 만나
+            <br />
+            함께 맞는 여덟 번째 봄, 결혼합니다.
+            <br />
+            지금처럼 서로의 가장 친한 친구가 되어
+            <br />
+            예쁘고 행복하게 잘 살겠습니다.
+            <br />
+            <br />
+            저희의 새로운 시작을 따뜻한 마음으로
+            <br />
+            함께 축복해 주세요.
           </div>
-          <div>
-            구헌상 · 나은효 <span className="text-gray-600">의 딸</span>{' '}
-            <span className="font-bold">동민</span>
+
+          {/* Names and Family Info */}
+          <div className="mb-6 text-center text-lg text-gray-900">
+            <div className="mb-1">
+              김기훈 · 김순희 <span className="text-gray-600">의 아들</span>{' '}
+              <span className="font-bold">덕곤</span>
+            </div>
+            <div>
+              구헌상 · 나은효 <span className="text-gray-600">의 딸</span>{' '}
+              <span className="font-bold">동민</span>
+            </div>
           </div>
-        </div>
-        <div className="max-w-md w-40">
-          <button
-            onClick={openContact}
-            className="w-full bg-stone-600 text-white py-3 px-4 rounded-lg hover:bg-stone-700 transition-colors"
-          >
-            연락하기
-          </button>
-        </div>
+          <div className="max-w-md w-40">
+            <button
+              onClick={openContact}
+              className="w-full bg-stone-600 text-white py-3 px-4 rounded-lg hover:bg-stone-700 transition-colors"
+            >
+              연락하기
+            </button>
+          </div>
+        </ScrollFadeIn>
       </section>
 
       {/* Image */}
@@ -930,17 +1169,18 @@ function App() {
 
       {/* Calendar */}
       <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 pb-16 pt-36">
-        <span className="block text-lg text-gray-500 tracking-widest mb-2  font-newyork">
-          WEDDING DAY
-        </span>
-        {/* Date and Time */}
-        <div className="mb-6 text-center">
-          <div className="text-2xl text-gray-900 font-medium mb-1">
-            2026.05.16
+        <ScrollFadeIn delay={0}>
+          <span className="block text-lg text-gray-500 tracking-widest mb-2  font-newyork">
+            WEDDING DAY
+          </span>
+          {/* Date and Time */}
+          <div className="mb-6 text-center">
+            <div className="text-2xl text-gray-900 font-medium mb-1">
+              2026.05.16
+            </div>
+            <div className="text-base text-gray-700">토요일 오후 3시</div>
           </div>
-          <div className="text-base text-gray-700">토요일 오후 3시</div>
-        </div>
-        <div className="w-full max-w-xs border-t border-b border-gray-400 py-4 mb-2">
+          <div className="w-full max-w-xs border-t border-b border-gray-400 py-4 mb-2">
           <div className="grid grid-cols-7 text-center text-gray-700 font-medium mb-2">
             <div className="text-rose-500">일</div>
             <div>월</div>
@@ -1069,54 +1309,58 @@ function App() {
             일 남았습니다
           </div>
         </div>
+        </ScrollFadeIn>
       </section>
       {/* Gallery Section */}
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
-        {/* Section Title */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
-          GALLERY
-        </span>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-8">
-          우리의 이야기
-        </h2>
-        {/* Grid Gallery */}
-        <div className="w-full max-w-3xl">
-          <div className="grid grid-cols-3 gap-1 sm:gap-2">
-            {images.slice(0, 15).map((src, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => {
-                  setCurrentImage(i);
-                  setIsGalleryOpen(true);
-                }}
-                className="group relative aspect-square w-full overflow-hidden bg-gray-200"
-              >
-                <img
-                  src={src}
-                  alt={`Gallery ${i + 1}`}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                  style={{
-                    objectPosition: imagePositions[i] || 'center',
+      <ScrollFadeIn delay={0}>
+        <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
+          {/* Section Title */}
+          <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
+            GALLERY
+          </span>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-8">
+            우리의 이야기
+          </h2>
+          {/* Grid Gallery */}
+          <div className="w-full max-w-3xl">
+            <div className="grid grid-cols-3 gap-1 sm:gap-2">
+              {images.slice(0, 15).map((src, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => {
+                    setCurrentImage(i);
+                    setIsGalleryOpen(true);
                   }}
-                  draggable={false}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-            ))}
+                  className="group relative aspect-square w-full overflow-hidden bg-gray-200"
+                >
+                  <img
+                    src={src}
+                    alt={`Gallery ${i + 1}`}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                    style={{
+                      objectPosition: imagePositions[i] || 'center',
+                    }}
+                    draggable={false}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </ScrollFadeIn>
 
       {/* Location Section */}
       <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 py-20">
-        {/* Section Title */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
-          LOCATION
-        </span>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-8">오시는 길</h2>
+        <ScrollFadeIn delay={0}>
+          {/* Section Title */}
+          <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
+            LOCATION
+          </span>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-8">오시는 길</h2>
 
-        <p className="mb-2">국립외교원</p>
+          <p className="mb-2">국립외교원</p>
         <p className="mb-2 text-gray-600">서울 서초구 남부순환로 2572</p>
         <p className="mb-2 text-gray-600">
           <a href="tel:+821012345678">02) 3497-7600</a>
@@ -1277,16 +1521,18 @@ function App() {
             </div>
           </div>
         </div>
+        </ScrollFadeIn>
       </section>
       {/* Information Section */}
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
-        {/* Section Title */}
-        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
-          INFORMATION
-        </span>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-8">
-          예식정보 및 안내사항
-        </h2>
+      <ScrollFadeIn delay={0}>
+        <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
+          {/* Section Title */}
+          <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
+            INFORMATION
+          </span>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-8">
+            예식정보 및 안내사항
+          </h2>
 
         {/* Tab Buttons
         <div className="flex space-x-2 mb-8">
@@ -1349,15 +1595,17 @@ function App() {
           </div>
         </div>
 
-        {/* Tab Content */}
-        {renderTabContent()}
-      </section>
+          {/* Tab Content */}
+          {renderTabContent()}
+        </section>
+      </ScrollFadeIn>
       {/* Guest Book */}
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
-        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
-          MESSAGE
-        </span>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-8">방명록</h2>
+      <ScrollFadeIn delay={0}>
+        <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20 mb-16">
+          <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
+            MESSAGE
+          </span>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-8">방명록</h2>
         {/* Write button */}
         <div className="max-w-md w-full">
           <button
@@ -1545,16 +1793,18 @@ function App() {
             {showAll ? '페이지 보기' : '전체보기'}
           </button>
         </div> */}
-      </section>
+        </section>
+      </ScrollFadeIn>
 
       {/* Account Section */}
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
-        <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
-          ACCOUNT
-        </span>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-          마음 전하실 곳
-        </h2>
+      <ScrollFadeIn delay={0}>
+        <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-20">
+          <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
+            ACCOUNT
+          </span>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            마음 전하실 곳
+          </h2>
         <p className="mb-2 py-6 text-sm text-center">
           참석이 어려우신 분들을 위해 기재했습니다 <br /> 너그러운 마음으로 양해
           부탁드립니다
@@ -1834,7 +2084,8 @@ function App() {
             </div>
           )}
         </div>
-      </section>
+        </section>
+      </ScrollFadeIn>
 
       {/* Closing Image + Quote */}
       <section className="w-full">
