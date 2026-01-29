@@ -18,6 +18,12 @@ jobs:
         with: { node-version: 20 }
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_KAKAO_JS_KEY: ${{ secrets.VITE_KAKAO_JS_KEY }}
+          VITE_KAKAO_API_KEY: ${{ secrets.VITE_KAKAO_API_KEY }}
+          VITE_KAKAO_TEMPLATE_ID: ${{ secrets.VITE_KAKAO_TEMPLATE_ID }}
       - uses: actions/upload-pages-artifact@v3
         with: { path: './dist' }
   deploy:
