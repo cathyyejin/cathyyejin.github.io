@@ -1688,7 +1688,7 @@ function App() {
           </div>
         </div>
         <p className="px-2 py-6 text-sm">
-          *국립외교원은 외교센터와 다른 건물이오니 혼동하지 않으시기 바랍니다.
+          *국립외교원은 외교센터와 다른 건물이오니 <br /> 혼동하지 않으시기 바랍니다.
         </p>
         {/* Detailed Directions */}
         <div className="w-full max-w-2xl space-y-6 px-2">
@@ -1769,7 +1769,7 @@ function App() {
             </div>
             <div className="ml-2 space-y-2">
               <p>국립외교원 내 지상주차장</p>
-              <p>주차 공간이 넉넉하여 자가용 이용이 가능합니다.</p>
+              <p>주차 공간이 넉넉하여 자가용 이용이 <br /> 가능합니다.</p>
             </div>
           </div>
         </div>
