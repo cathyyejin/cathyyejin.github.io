@@ -2646,7 +2646,6 @@ function App() {
                   <label className="block text-sm font-medium text-gray-700">
                     비밀번호 <span className="text-red-500">*</span>
                   </label>
-                  {/* <input type="password" value={gbPassword} onChange={(e) => setGbPassword(e.target.value)} placeholder="삭제/수정을 위한 비밀번호" className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500" autoComplete="new-password" inputMode="numeric" /> */}
                   <input
                     type="password"
                     value={gbPassword}
