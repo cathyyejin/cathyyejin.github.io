@@ -1687,7 +1687,7 @@ function App() {
             </a>
           </div>
         </div>
-        <p className="px-2 py-6 text-sm">
+        <p className="px-2 py-6 text-sm w-full">
           *국립외교원은 외교센터와 다른 건물이오니 <br /> 혼동하지 않으시기 바랍니다.
         </p>
         {/* Detailed Directions */}
