@@ -1018,9 +1018,9 @@ function App() {
         mapUrl: mapUrlValue,
         // 다른 가능한 변수명들도 함께 전달 (템플릿에서 사용하는 이름에 맞춰 하나만 작동)
         // 주석 처리된 것들은 필요시 활성화:
-        // map_url: mapUrlValue,
-        // MAP_URL: mapUrlValue,
-        // MapUrl: mapUrlValue,
+        map_url: mapUrlValue,
+        MAP_URL: mapUrlValue,
+        MapUrl: mapUrlValue,
       },
     };
     
