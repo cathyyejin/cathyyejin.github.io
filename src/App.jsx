@@ -690,7 +690,7 @@ function App() {
     }
   };
 
-const snapToNearest = (immediate = false) => {
+const snapToNearest = () => {
   const el = scrollerRef.current;
   if (!el) return;
 
@@ -705,10 +705,11 @@ const snapToNearest = (immediate = false) => {
 
   const targetScroll = nearestIndex * itemWidth;
 
-  if (Math.abs(scrollLeft - targetScroll) > 1) {
+  // Only snap if significantly off-center (more than 10% of item width)
+  if (Math.abs(scrollLeft - targetScroll) > itemWidth * 0.1) {
     el.scrollTo({
       left: targetScroll,
-      behavior: immediate ? 'auto' : 'smooth',
+      behavior: 'smooth',
     });
   }
 
@@ -732,20 +733,18 @@ const handleTouchStart = (e) => {
 const handleTouchEnd = () => {
   setIsDragging(false);
 
-  // momentum settle 후 스냅
-  setTimeout(() => {
-    snapToNearest(true);
-  }, 50);
+  // Let CSS scroll-snap handle the snapping naturally
+  // Only programmatically snap if needed after momentum settles
+  scrollTimeoutRef.current = setTimeout(() => {
+    snapToNearest();
+  }, 300);
 };
 
 const onScrollSnap = () => {
   const el = scrollerRef.current;
   if (!el) return;
 
-  isScrollingRef.current = true;
-
-  if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-
+  // Update current image index based on scroll position
   const scrollLeft = el.scrollLeft;
   const itemWidth = el.clientWidth;
   if (itemWidth > 0) {
@@ -756,9 +755,16 @@ const onScrollSnap = () => {
     if (idx !== currentImage) setCurrentImage(idx);
   }
 
+  // Clear any pending snap and reset
+  if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+  isScrollingRef.current = true;
+
+  // Only snap after scrolling has completely stopped
   scrollTimeoutRef.current = setTimeout(() => {
-    snapToNearest(true);
-  }, 100);
+    if (!isDragging) {
+      snapToNearest();
+    }
+  }, 150);
 };
 
   // const scrollerRef = useRef(null);
@@ -2551,13 +2557,7 @@ const onScrollSnap = () => {
                 height: 'calc(var(--vh, 1vh) * 100)',
                 width: '100%',
                 touchAction: 'pan-x',
-              
-                // ✅ 핵심 1) 드래그 중엔 smooth 끄기 (twitch 예방)
-                scrollBehavior: isDragging ? 'auto' : 'smooth',
-              
-                // ✅ 핵심 2) 안드로이드에서는 오히려 충돌 나는 경우 많아서 제거/완화
-                WebkitOverflowScrolling: 'auto', // 또는 이 줄 자체를 삭제해도 됨
-              
+                scrollBehavior: 'smooth',
                 scrollSnapType: 'x mandatory',
                 overscrollBehavior: 'none',
                 overflowX: 'auto',
