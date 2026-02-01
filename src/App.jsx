@@ -659,20 +659,10 @@ function App() {
   };
 
   const scrollerRef = useRef(null);
-  const scrollTimeoutRef = useRef(null);
-  const isScrollingRef = useRef(false);
-  const touchStartXRef = useRef(0);
-  const touchStartScrollLeftRef = useRef(0);
 
-  const [isDragging, setIsDragging] = useState(false);
-
-  // Navigate to specific image index
+  // Navigate to specific image index (no scrolling, just state change)
   const scrollToIndex = (i) => {
-    const el = scrollerRef.current;
-    if (!el) return;
     const targetIndex = Math.max(0, Math.min(i, images.length - 1));
-    const targetScroll = targetIndex * el.clientWidth;
-    el.scrollTo({ left: targetScroll, behavior: 'smooth' });
     setCurrentImage(targetIndex);
   };
 
@@ -690,82 +680,7 @@ function App() {
     }
   };
 
-const snapToNearest = () => {
-  const el = scrollerRef.current;
-  if (!el) return;
-
-  const scrollLeft = el.scrollLeft;
-  const itemWidth = el.clientWidth;
-  if (itemWidth === 0) return;
-
-  const nearestIndex = Math.max(
-    0,
-    Math.min(Math.round(scrollLeft / itemWidth), images.length - 1)
-  );
-
-  const targetScroll = nearestIndex * itemWidth;
-
-  // Only snap if significantly off-center (more than 10% of item width)
-  if (Math.abs(scrollLeft - targetScroll) > itemWidth * 0.1) {
-    el.scrollTo({
-      left: targetScroll,
-      behavior: 'smooth',
-    });
-  }
-
-  if (nearestIndex !== currentImage) setCurrentImage(nearestIndex);
-  isScrollingRef.current = false;
-};
-
-const handleTouchStart = (e) => {
-  setIsDragging(true);
-
-  const el = scrollerRef.current;
-  if (!el) return;
-
-  touchStartXRef.current = e.touches[0].clientX;
-  touchStartScrollLeftRef.current = el.scrollLeft;
-  isScrollingRef.current = true;
-
-  if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-};
-
-const handleTouchEnd = () => {
-  setIsDragging(false);
-
-  // Let CSS scroll-snap handle the snapping naturally
-  // Only programmatically snap if needed after momentum settles
-  scrollTimeoutRef.current = setTimeout(() => {
-    snapToNearest();
-  }, 300);
-};
-
-const onScrollSnap = () => {
-  const el = scrollerRef.current;
-  if (!el) return;
-
-  // Update current image index based on scroll position
-  const scrollLeft = el.scrollLeft;
-  const itemWidth = el.clientWidth;
-  if (itemWidth > 0) {
-    const idx = Math.max(
-      0,
-      Math.min(Math.round(scrollLeft / itemWidth), images.length - 1)
-    );
-    if (idx !== currentImage) setCurrentImage(idx);
-  }
-
-  // Clear any pending snap and reset
-  if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-  isScrollingRef.current = true;
-
-  // Only snap after scrolling has completely stopped
-  scrollTimeoutRef.current = setTimeout(() => {
-    if (!isDragging) {
-      snapToNearest();
-    }
-  }, 150);
-};
+// Scroll functionality removed - using arrow buttons only
 
   // const scrollerRef = useRef(null);
   // const scrollTimeoutRef = useRef(null);
@@ -929,10 +844,6 @@ const onScrollSnap = () => {
       
       // Restore scroll position
       window.scrollTo(0, scrollY);
-      
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
     };
   }, [isGalleryOpen]);
 
@@ -2522,32 +2433,9 @@ const onScrollSnap = () => {
               </button>
             </div>
 
-            {/* Swipe scroller */}
+            {/* Image container - no scrolling, only arrow navigation */}
             <div
               ref={scrollerRef}
-              onScroll={onScrollSnap}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              // 안드로이드에서 가로 스와이프 시 세로 스크롤이 같이 움직이는 현상을 줄이기 위해
-              // 이 영역에서는 가로(pan-x) 제스처만 허용
-              // style={{ 
-              //   position: 'absolute',
-              //   top: 0,
-              //   left: 0,
-              //   right: 0,
-              //   bottom: 0,
-              //   height: 'calc(var(--vh, 1vh) * 100)', // Lock height to prevent resize
-              //   width: '100%',
-              //   touchAction: 'pan-x', // Only allow horizontal panning
-              //   WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS/Android
-              //   scrollSnapType: 'x mandatory', // Force snap on Android
-              //   scrollBehavior: 'smooth',
-              //   overscrollBehavior: 'none', // Prevent bounce/overscroll
-              //   overscrollBehaviorX: 'none', // Prevent horizontal overscroll
-              //   overscrollBehaviorY: 'none', // Prevent vertical overscroll/bounce
-              //   overflowX: 'auto',
-              //   overflowY: 'hidden', // Completely prevent vertical scroll
-              // }}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -2556,23 +2444,20 @@ const onScrollSnap = () => {
                 bottom: 0,
                 height: 'calc(var(--vh, 1vh) * 100)',
                 width: '100%',
-                touchAction: 'pan-x',
-                scrollBehavior: 'smooth',
-                scrollSnapType: 'x mandatory',
-                overscrollBehavior: 'none',
-                overflowX: 'auto',
-                overflowY: 'hidden',
+                overflow: 'hidden',
+                touchAction: 'none',
               }}
-              
-              className="hide-scrollbar flex snap-x snap-mandatory"
+              className="flex"
             >
               {images.map((src, i) => (
                 <div 
                   key={i} 
-                  className="relative min-w-full snap-center flex-shrink-0"
+                  className="relative flex-shrink-0"
                   style={{
-                    height: 'calc(var(--vh, 1vh) * 100)', // Lock height
+                    height: 'calc(var(--vh, 1vh) * 100)',
                     width: '100%',
+                    transform: `translateX(-${currentImage * 100}%)`,
+                    transition: 'transform 0.3s ease-in-out',
                   }}
                 >
                   <img
@@ -2580,7 +2465,13 @@ const onScrollSnap = () => {
                     alt={`Gallery ${i + 1}`}
                     className="w-full h-full object-contain object-center"
                     style={{
-                      height: 'calc(var(--vh, 1vh) * 100)', // Lock image height
+                      height: 'calc(var(--vh, 1vh) * 100)',
+                      objectFit: 'contain',
+                      objectPosition: imagePositions[src] || 'center',
+                      userSelect: 'none',
+                      WebkitUserSelect: 'none',
+                      touchAction: 'none',
+                      pointerEvents: 'none',
                     }}
                     draggable={false}
                   />
