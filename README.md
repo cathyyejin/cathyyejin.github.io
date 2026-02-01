@@ -3,6 +3,12 @@
 A lightweight React app built with **Vite** and styled with **Tailwind CSS**.  
 This repository is the user site **cathyyejin.github.io**, so GitHub Pages serves from the default branch.
 
+## Version
+
+Current version: **1.0.0**
+
+See [CHANGELOG.md](./CHANGELOG.md) for detailed version history and changes.
+
 ## Tech Stack
 - Vite
 - React

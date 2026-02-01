@@ -659,12 +659,36 @@ function App() {
   };
 
   const scrollerRef = useRef(null);
-const scrollTimeoutRef = useRef(null);
-const isScrollingRef = useRef(false);
-const touchStartXRef = useRef(0);
-const touchStartScrollLeftRef = useRef(0);
+  const scrollTimeoutRef = useRef(null);
+  const isScrollingRef = useRef(false);
+  const touchStartXRef = useRef(0);
+  const touchStartScrollLeftRef = useRef(0);
 
-const [isDragging, setIsDragging] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Navigate to specific image index
+  const scrollToIndex = (i) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const targetIndex = Math.max(0, Math.min(i, images.length - 1));
+    const targetScroll = targetIndex * el.clientWidth;
+    el.scrollTo({ left: targetScroll, behavior: 'smooth' });
+    setCurrentImage(targetIndex);
+  };
+
+  // Navigate to previous image
+  const goToPrevious = () => {
+    if (currentImage > 0) {
+      scrollToIndex(currentImage - 1);
+    }
+  };
+
+  // Navigate to next image
+  const goToNext = () => {
+    if (currentImage < images.length - 1) {
+      scrollToIndex(currentImage + 1);
+    }
+  };
 
 const snapToNearest = (immediate = false) => {
   const el = scrollerRef.current;
@@ -2490,6 +2514,10 @@ const onScrollSnap = () => {
                   />
                 </svg>
               </button>
+              {/* Image counter */}
+              <div className="px-3 py-1.5 rounded-full bg-black/50 text-white text-sm font-medium">
+                {currentImage + 1} / {images.length}
+              </div>
             </div>
 
             {/* Swipe scroller */}
@@ -2564,16 +2592,61 @@ const onScrollSnap = () => {
               ))}
             </div>
 
-            {/* Dots */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => scrollToIndex(i)}
-                  aria-label={`${i + 1}번 이미지로 이동`}
-                  className={`w-2.5 h-2.5 rounded-full ${i === currentImage ? 'bg-white' : 'bg-white/40'}`}
+            {/* Left Arrow - positioned on left side */}
+            <button
+              onClick={goToPrevious}
+              disabled={currentImage === 0}
+              aria-label="이전 이미지"
+              className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white transition-all ${
+                currentImage === 0
+                  ? 'opacity-30 cursor-not-allowed'
+                  : 'hover:opacity-80 active:scale-95'
+              }`}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                className="w-8 h-8"
+                strokeWidth="3"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 19l-7-7 7-7"
                 />
-              ))}
+              </svg>
+            </button>
+
+            {/* Right Arrow - positioned on right side */}
+            <button
+              onClick={goToNext}
+              disabled={currentImage === images.length - 1}
+              aria-label="다음 이미지"
+              className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white transition-all ${
+                currentImage === images.length - 1
+                  ? 'opacity-30 cursor-not-allowed'
+                  : 'hover:opacity-80 active:scale-95'
+              }`}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                className="w-8 h-8"
+                strokeWidth="3"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+
+            {/* Image counter - bottom center */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-black/60 backdrop-blur-sm text-white text-sm font-medium min-w-[70px] text-center">
+              {currentImage + 1} / {images.length}
             </div>
           </div>
         </div>
