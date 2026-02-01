@@ -2494,11 +2494,11 @@ const onScrollSnap = () => {
             }}
           >
             {/* Top bar */}
-            <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+            <div className="absolute top-3 left-3 z-10">
               <button
                 onClick={() => setIsGalleryOpen(false)}
                 aria-label="닫기"
-                className="p-2 rounded-md bg-white/20 hover:bg-white/30 text-white"
+                className="p-2 rounded-md bg-black/50 hover:bg-white/60 text-white"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -2514,10 +2514,6 @@ const onScrollSnap = () => {
                   />
                 </svg>
               </button>
-              {/* Image counter */}
-              <div className="px-3 py-1.5 rounded-full bg-black/50 text-white text-sm font-medium">
-                {currentImage + 1} / {images.length}
-              </div>
             </div>
 
             {/* Swipe scroller */}
