@@ -70,21 +70,7 @@
 
 @font-face {
   font-family: 'NewYork';
-  src: url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-ExtraLight.eot);
-  src:
-    url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-ExtraLight.eot?#iefix)
-      format('embedded-opentype'),
-    url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-ExtraLight.woff2)
-      format('woff2'),
-    url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-ExtraLight.woff)
-      format('woff'),
-    url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-ExtraLight.ttf)
-      format('truetype');
-}
-
-@font-face {
-  font-family: 'NewYork';
-  src: url('/fonts/NewYork.otf') format('otf');
+  src: url('/fonts/NewYork.otf') format('opentype');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -98,10 +84,39 @@
 html,
 body {
   height: 100%;
+  width: 100%;
+  overflow: hidden; 
   overflow-x: hidden;
-  touch-action: manipulation;
+  /* touch-action: manipulation; */
+  touch-action: pan-x pan-y;      /* manipulation 보다 안전한 편 */
   overscroll-behavior: none; /* Prevent bounce/overscroll on Android */
   overscroll-behavior-y: none; /* Prevent vertical bounce */
+}
+
+body {
+  position: fixed;               /* ✅ 스크롤/바운스 방지 핵심 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  -webkit-text-size-adjust: 100%;
+}
+
+#root {
+  height: 100%;
+  overflow-y: auto;              /* ✅ 스크롤은 여기서 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  max-width: 100%;
 }
 
 /* Viewport height variable for preventing Android browser UI resize issues */
@@ -109,15 +124,15 @@ body {
   --vh: 1vh; /* Fallback, will be set by JavaScript */
 }
 
-body {
+/* body {
   overflow-y: auto;
   min-height: 100vh;
   -webkit-text-size-adjust: 100%;
-}
+} */
 
-#root {
+/* #root {
   min-height: 100vh;
-}
+} */
 
 /* Prevent image stretching on Android browsers */
 img {

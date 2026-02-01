@@ -299,6 +299,36 @@ function App() {
   const audioRef = useRef(null);
   const hasTriedAutoplayRef = useRef(false);
 
+  // const [isDragging, setIsDragging] = useState(false);
+  // const snapToNearest = () => {
+  //   const el = scrollerRef.current;
+  //   if (!el) return;
+  
+  //   const w = el.clientWidth || 1;
+  //   const idx = Math.round(el.scrollLeft / w);
+  
+  //   // ✅ 한 장 위치로 강제 정렬
+  //   el.scrollTo({ left: idx * w, behavior: 'smooth' });
+  //   setCurrentImage(idx);
+  // };
+  
+  // const handleTouchStart = (e) => {
+  //   setIsDragging(true);
+  //   // (기존 로직 있으면 그대로 두기)
+  // };
+  
+  // const handleTouchEnd = (e) => {
+  //   setIsDragging(false);
+  
+  //   // ✅ 손 떼는 순간 가장 가까운 이미지로 스냅 고정
+  //   requestAnimationFrame(() => {
+  //     snapToNearest();
+  //   });
+  
+  //   // (기존 로직 있으면 그대로 두기)
+  // };
+  
+
   // 토스트
   const [toast, setToast] = useState({
     open: false,
@@ -629,107 +659,186 @@ function App() {
   };
 
   const scrollerRef = useRef(null);
-  const scrollTimeoutRef = useRef(null);
-  const isScrollingRef = useRef(false);
-  const touchStartXRef = useRef(0);
-  const touchStartScrollLeftRef = useRef(0);
+const scrollTimeoutRef = useRef(null);
+const isScrollingRef = useRef(false);
+const touchStartXRef = useRef(0);
+const touchStartScrollLeftRef = useRef(0);
 
-  const scrollToIndex = (i) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const targetScroll = i * el.clientWidth;
-    el.scrollTo({ left: targetScroll, behavior: 'smooth' });
-    setCurrentImage(i);
-  };
+const [isDragging, setIsDragging] = useState(false);
 
-  // Snap to nearest image - more aggressive for Android
-  const snapToNearest = (immediate = false) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    
-    const scrollLeft = el.scrollLeft;
-    const itemWidth = el.clientWidth;
-    
-    if (itemWidth === 0) return; // Element not ready
-    
-    const nearestIndex = Math.max(0, Math.min(
-      Math.round(scrollLeft / itemWidth),
-      images.length - 1
-    ));
-    const targetScroll = nearestIndex * itemWidth;
-    
-    // Always snap if not at target (more aggressive for Android)
-    if (Math.abs(scrollLeft - targetScroll) > 1) {
-      // Use instant scroll for immediate snapping, smooth for programmatic
-      el.scrollTo({ 
-        left: targetScroll, 
-        behavior: immediate ? 'auto' : 'smooth' 
-      });
-    }
-    
-    if (nearestIndex !== currentImage) {
-      setCurrentImage(nearestIndex);
-    }
-    
-    isScrollingRef.current = false;
-  };
+const snapToNearest = (immediate = false) => {
+  const el = scrollerRef.current;
+  if (!el) return;
 
-  // Handle touch start to track swipe
-  const handleTouchStart = (e) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    touchStartXRef.current = e.touches[0].clientX;
-    touchStartScrollLeftRef.current = el.scrollLeft;
-    isScrollingRef.current = true;
-    
-    // Clear any pending snap
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-  };
+  const scrollLeft = el.scrollLeft;
+  const itemWidth = el.clientWidth;
+  if (itemWidth === 0) return;
 
-  // Handle touch end - snap immediately
-  const handleTouchEnd = (e) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    
-    // Small delay to let momentum scrolling settle, then snap
-    setTimeout(() => {
-      snapToNearest(true); // Immediate snap
-    }, 50);
-  };
+  const nearestIndex = Math.max(
+    0,
+    Math.min(Math.round(scrollLeft / itemWidth), images.length - 1)
+  );
 
-  // keep currentImage in sync while the user scrolls
-  const onScrollSnap = () => {
-    const el = scrollerRef.current;
-    if (!el) return;
+  const targetScroll = nearestIndex * itemWidth;
+
+  if (Math.abs(scrollLeft - targetScroll) > 1) {
+    el.scrollTo({
+      left: targetScroll,
+      behavior: immediate ? 'auto' : 'smooth',
+    });
+  }
+
+  if (nearestIndex !== currentImage) setCurrentImage(nearestIndex);
+  isScrollingRef.current = false;
+};
+
+const handleTouchStart = (e) => {
+  setIsDragging(true);
+
+  const el = scrollerRef.current;
+  if (!el) return;
+
+  touchStartXRef.current = e.touches[0].clientX;
+  touchStartScrollLeftRef.current = el.scrollLeft;
+  isScrollingRef.current = true;
+
+  if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+};
+
+const handleTouchEnd = () => {
+  setIsDragging(false);
+
+  // momentum settle 후 스냅
+  setTimeout(() => {
+    snapToNearest(true);
+  }, 50);
+};
+
+const onScrollSnap = () => {
+  const el = scrollerRef.current;
+  if (!el) return;
+
+  isScrollingRef.current = true;
+
+  if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+
+  const scrollLeft = el.scrollLeft;
+  const itemWidth = el.clientWidth;
+  if (itemWidth > 0) {
+    const idx = Math.max(
+      0,
+      Math.min(Math.round(scrollLeft / itemWidth), images.length - 1)
+    );
+    if (idx !== currentImage) setCurrentImage(idx);
+  }
+
+  scrollTimeoutRef.current = setTimeout(() => {
+    snapToNearest(true);
+  }, 100);
+};
+
+  // const scrollerRef = useRef(null);
+  // const scrollTimeoutRef = useRef(null);
+  // const isScrollingRef = useRef(false);
+  // const touchStartXRef = useRef(0);
+  // const touchStartScrollLeftRef = useRef(0);
+
+  // const scrollToIndex = (i) => {
+  //   const el = scrollerRef.current;
+  //   if (!el) return;
+  //   const targetScroll = i * el.clientWidth;
+  //   el.scrollTo({ left: targetScroll, behavior: 'smooth' });
+  //   setCurrentImage(i);
+  // };
+
+  // // Snap to nearest image - more aggressive for Android
+  // const snapToNearest = (immediate = false) => {
+  //   const el = scrollerRef.current;
+  //   if (!el) return;
     
-    isScrollingRef.current = true;
+  //   const scrollLeft = el.scrollLeft;
+  //   const itemWidth = el.clientWidth;
     
-    // Clear any existing timeout
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
+  //   if (itemWidth === 0) return; // Element not ready
     
-    // Update current image index during scroll
-    const scrollLeft = el.scrollLeft;
-    const itemWidth = el.clientWidth;
+  //   const nearestIndex = Math.max(0, Math.min(
+  //     Math.round(scrollLeft / itemWidth),
+  //     images.length - 1
+  //   ));
+  //   const targetScroll = nearestIndex * itemWidth;
     
-    if (itemWidth > 0) {
-      const idx = Math.max(0, Math.min(
-        Math.round(scrollLeft / itemWidth),
-        images.length - 1
-      ));
-      if (idx !== currentImage && idx >= 0 && idx < images.length) {
-        setCurrentImage(idx);
-      }
-    }
+  //   // Always snap if not at target (more aggressive for Android)
+  //   if (Math.abs(scrollLeft - targetScroll) > 1) {
+  //     // Use instant scroll for immediate snapping, smooth for programmatic
+  //     el.scrollTo({ 
+  //       left: targetScroll, 
+  //       behavior: immediate ? 'auto' : 'smooth' 
+  //     });
+  //   }
     
-    // After scroll ends, snap to nearest image (important for Android)
-    scrollTimeoutRef.current = setTimeout(() => {
-      snapToNearest(true); // Use immediate snap
-    }, 100); // Reduced timeout for faster snapping
-  };
+  //   if (nearestIndex !== currentImage) {
+  //     setCurrentImage(nearestIndex);
+  //   }
+    
+  //   isScrollingRef.current = false;
+  // };
+
+  // // Handle touch start to track swipe
+  // const handleTouchStart = (e) => {
+  //   const el = scrollerRef.current;
+  //   if (!el) return;
+  //   touchStartXRef.current = e.touches[0].clientX;
+  //   touchStartScrollLeftRef.current = el.scrollLeft;
+  //   isScrollingRef.current = true;
+    
+  //   // Clear any pending snap
+  //   if (scrollTimeoutRef.current) {
+  //     clearTimeout(scrollTimeoutRef.current);
+  //   }
+  // };
+
+  // // Handle touch end - snap immediately
+  // const handleTouchEnd = (e) => {
+  //   const el = scrollerRef.current;
+  //   if (!el) return;
+    
+  //   // Small delay to let momentum scrolling settle, then snap
+  //   setTimeout(() => {
+  //     snapToNearest(true); // Immediate snap
+  //   }, 50);
+  // };
+
+  // // keep currentImage in sync while the user scrolls
+  // const onScrollSnap = () => {
+  //   const el = scrollerRef.current;
+  //   if (!el) return;
+    
+  //   isScrollingRef.current = true;
+    
+  //   // Clear any existing timeout
+  //   if (scrollTimeoutRef.current) {
+  //     clearTimeout(scrollTimeoutRef.current);
+  //   }
+    
+  //   // Update current image index during scroll
+  //   const scrollLeft = el.scrollLeft;
+  //   const itemWidth = el.clientWidth;
+    
+  //   if (itemWidth > 0) {
+  //     const idx = Math.max(0, Math.min(
+  //       Math.round(scrollLeft / itemWidth),
+  //       images.length - 1
+  //     ));
+  //     if (idx !== currentImage && idx >= 0 && idx < images.length) {
+  //       setCurrentImage(idx);
+  //     }
+  //   }
+    
+  //   // After scroll ends, snap to nearest image (important for Android)
+  //   scrollTimeoutRef.current = setTimeout(() => {
+  //     snapToNearest(true); // Use immediate snap
+  //   }, 100); // Reduced timeout for faster snapping
+  // };
 
   // 갤러리 전체보기 모달이 열려 있을 때는 배경 스크롤을 막아서
   // 안드로이드에서 가로 스와이프 시 페이지 세로 스크롤이 같이 되는 현상을 줄임
@@ -827,107 +936,53 @@ function App() {
       aria-hidden="true"
       {...props}
     >
-      {/* <path
-        d="M8.25 20.25V21.75C8.25 22.1478 8.09196 22.5293 7.81066 22.8106C7.52936 23.0919 7.14782 23.25 6.75 23.25C6.35218 23.25 5.97064 23.0919 5.68934 22.8106C5.40804 22.5293 5.25 22.1478 5.25 21.75V20.3651"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M15.75 20.25V21.75C15.75 22.1478 15.908 22.5293 16.1893 22.8106C16.4706 23.0919 16.8522 23.25 17.25 23.25C17.6478 23.25 18.0294 23.0919 18.3107 22.8106C18.592 22.5293 18.75 22.1478 18.75 21.75V20.25"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M0.75 9.75V6.75C0.75 6.35218 0.908035 5.97064 1.18934 5.68934C1.47064 5.40804 1.85218 5.25 2.25 5.25H3.60938"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M23.25 9.75V6.75C23.25 6.35218 23.092 5.97064 22.8107 5.68934C22.5294 5.40804 22.1478 5.25 21.75 5.25H20.375"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M18.25 0.75H5.75C4.64543 0.75 3.75 1.64543 3.75 2.75V18.25C3.75 19.3546 4.64543 20.25 5.75 20.25H18.25C19.3546 20.25 20.25 19.3546 20.25 18.25V2.75C20.25 1.64543 19.3546 0.75 18.25 0.75Z"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M20.25 14.25H3.75"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M14.25 17.25H17.25"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6.75 17.25H9.75"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.75 3.75H14.25"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      /> */}
       <path
         d="M4 10C4 6.22876 4 4.34315 5.17157 3.17157C6.34315 2 8.22876 2 12 2C15.7712 2 17.6569 2 18.8284 3.17157C20 4.34315 20 6.22876 20 10V12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34315 20 5.17157 18.8284C4 17.6569 4 15.7712 4 12V10Z"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
         d="M4 13H20"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M15.5 16H17"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M7 16H8.5"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M6 19.5V21C6 21.5523 6.44772 22 7 22H8.5C9.05228 22 9.5 21.5523 9.5 21V20"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M18 19.5V21C18 21.5523 17.5523 22 17 22H15.5C14.9477 22 14.5 21.5523 14.5 21V20"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M20 9H21C21.5523 9 22 9.44772 22 10V11C22 11.3148 21.8518 11.6111 21.6 11.8L20 13"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M4 9H3C2.44772 9 2 9.44772 2 10V11C2 11.3148 2.14819 11.6111 2.4 11.8L4 13"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <path d="M19.5 5H4.5" stroke-width="1.5" stroke-linecap="round" />
+      <path d="M19.5 5H4.5" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 
@@ -935,9 +990,9 @@ function App() {
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
       <path
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         d="M3 8L5.72187 10.2682C5.90158 10.418 6.12811 10.5 6.36205 10.5H17.6379C17.8719 10.5 18.0984 10.418 18.2781 10.2682L21 8M6.5 14H6.51M17.5 14H17.51M8.16065 4.5H15.8394C16.5571 4.5 17.2198 4.88457 17.5758 5.50772L20.473 10.5777C20.8183 11.1821 21 11.8661 21 12.5623V18.5C21 19.0523 20.5523 19.5 20 19.5H19C18.4477 19.5 18 19.0523 18 18.5V17.5H6V18.5C6 19.0523 5.55228 19.5 5 19.5H4C3.44772 19.5 3 19.0523 3 18.5V12.5623C3 11.8661 3.18166 11.1821 3.52703 10.5777L6.42416 5.50772C6.78024 4.88457 7.44293 4.5 8.16065 4.5ZM7 14C7 14.2761 6.77614 14.5 6.5 14.5C6.22386 14.5 6 14.2761 6 14C6 13.7239 6.22386 13.5 6.5 13.5C6.77614 13.5 7 13.7239 7 14ZM18 14C18 14.2761 17.7761 14.5 17.5 14.5C17.2239 14.5 17 14.2761 17 14C17 13.7239 17.2239 13.5 17.5 13.5C17.7761 13.5 18 13.7239 18 14Z"
       />
     </svg>
@@ -1308,7 +1363,6 @@ function App() {
           className="relative w-full overflow-hidden"
           style={{ 
             height: 'calc(var(--vh, 1vh) * 100)',
-            overscrollBehavior: 'none',
             touchAction: 'pan-y', // Allow vertical scroll but prevent bounce
           }}
         >
@@ -1324,8 +1378,7 @@ function App() {
               width: '100%',
               maxWidth: '100%',
               maxHeight: 'calc(var(--vh, 1vh) * 100)',
-              overscrollBehavior: 'none',
-            }}
+              }}
             draggable={false}
           />
         </div>
@@ -1391,7 +1444,6 @@ function App() {
           className="relative w-full max-w-2xl mx-auto overflow-hidden"
           style={{ 
             height: 'calc(var(--vh, 1vh) * 100)',
-            overscrollBehavior: 'none',
             touchAction: 'pan-y', // Allow vertical scroll but prevent bounce
           }}
         >
@@ -1412,8 +1464,7 @@ function App() {
               width: '100%',
               maxWidth: '100%',
               maxHeight: 'calc(var(--vh, 1vh) * 100)',
-              overscrollBehavior: 'none',
-            }}
+              }}
             draggable={false}
           />
         </div>
@@ -2109,20 +2160,20 @@ function App() {
                       stroke="currentColor"
                     >
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
                         d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                       <path
                         d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                     <span>복사</span>
@@ -2152,20 +2203,20 @@ function App() {
                       stroke="currentColor"
                     >
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
                         d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                       <path
                         d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                     <span>복사</span>
@@ -2195,20 +2246,20 @@ function App() {
                       stroke="currentColor"
                     >
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
                         d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                       <path
                         d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                     <span>복사</span>
@@ -2270,20 +2321,20 @@ function App() {
                       stroke="currentColor"
                     >
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
                         d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                       <path
                         d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                     <span>복사</span>
@@ -2313,20 +2364,20 @@ function App() {
                       stroke="currentColor"
                     >
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
                         d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                       <path
                         d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
                         stroke="#000000"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
                     <span>복사</span>
@@ -2346,7 +2397,6 @@ function App() {
           className="relative w-full max-w-2xl mx-auto overflow-hidden"
           style={{ 
             height: 'calc(var(--vh, 1vh) * 100)',
-            overscrollBehavior: 'none',
             touchAction: 'pan-y', // Allow vertical scroll but prevent bounce
           }}
         >
@@ -2362,8 +2412,7 @@ function App() {
               width: '100%',
               maxWidth: '100%',
               maxHeight: 'calc(var(--vh, 1vh) * 100)',
-              overscrollBehavior: 'none',
-            }}
+              }}
             draggable={false}
           />
 
@@ -2393,7 +2442,6 @@ function App() {
             bottom: 0,
             height: 'calc(var(--vh, 1vh) * 100)', // Lock height to prevent resize
             width: '100%',
-            overscrollBehavior: 'none',
             touchAction: 'pan-x',
             overflow: 'hidden',
           }}
@@ -2404,8 +2452,7 @@ function App() {
             onClick={() => setIsGalleryOpen(false)}
             style={{ 
               touchAction: 'none',
-              overscrollBehavior: 'none',
-            }}
+              }}
           />
 
           {/* Content */}
@@ -2418,8 +2465,7 @@ function App() {
               bottom: 0,
               height: 'calc(var(--vh, 1vh) * 100)', // Lock height
               width: '100%',
-              overscrollBehavior: 'none',
-              touchAction: 'pan-x',
+                touchAction: 'pan-x',
               overflow: 'hidden',
             }}
           >
@@ -2454,24 +2500,46 @@ function App() {
               onTouchEnd={handleTouchEnd}
               // 안드로이드에서 가로 스와이프 시 세로 스크롤이 같이 움직이는 현상을 줄이기 위해
               // 이 영역에서는 가로(pan-x) 제스처만 허용
-              style={{ 
+              // style={{ 
+              //   position: 'absolute',
+              //   top: 0,
+              //   left: 0,
+              //   right: 0,
+              //   bottom: 0,
+              //   height: 'calc(var(--vh, 1vh) * 100)', // Lock height to prevent resize
+              //   width: '100%',
+              //   touchAction: 'pan-x', // Only allow horizontal panning
+              //   WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS/Android
+              //   scrollSnapType: 'x mandatory', // Force snap on Android
+              //   scrollBehavior: 'smooth',
+              //   overscrollBehavior: 'none', // Prevent bounce/overscroll
+              //   overscrollBehaviorX: 'none', // Prevent horizontal overscroll
+              //   overscrollBehaviorY: 'none', // Prevent vertical overscroll/bounce
+              //   overflowX: 'auto',
+              //   overflowY: 'hidden', // Completely prevent vertical scroll
+              // }}
+              style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
-                height: 'calc(var(--vh, 1vh) * 100)', // Lock height to prevent resize
+                height: 'calc(var(--vh, 1vh) * 100)',
                 width: '100%',
-                touchAction: 'pan-x', // Only allow horizontal panning
-                WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS/Android
-                scrollSnapType: 'x mandatory', // Force snap on Android
-                scrollBehavior: 'smooth',
-                overscrollBehavior: 'none', // Prevent bounce/overscroll
-                overscrollBehaviorX: 'none', // Prevent horizontal overscroll
-                overscrollBehaviorY: 'none', // Prevent vertical overscroll/bounce
+                touchAction: 'pan-x',
+              
+                // ✅ 핵심 1) 드래그 중엔 smooth 끄기 (twitch 예방)
+                scrollBehavior: isDragging ? 'auto' : 'smooth',
+              
+                // ✅ 핵심 2) 안드로이드에서는 오히려 충돌 나는 경우 많아서 제거/완화
+                WebkitOverflowScrolling: 'auto', // 또는 이 줄 자체를 삭제해도 됨
+              
+                scrollSnapType: 'x mandatory',
+                overscrollBehavior: 'none',
                 overflowX: 'auto',
-                overflowY: 'hidden', // Completely prevent vertical scroll
+                overflowY: 'hidden',
               }}
+              
               className="hide-scrollbar flex snap-x snap-mandatory"
             >
               {images.map((src, i) => (
@@ -3065,18 +3133,18 @@ function App() {
                 aria-hidden="true"
               >
                 <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
+                  fillRule="evenodd"
+                  clipRule="evenodd"
                   d="M17.676 14.248C17.676 15.8651 16.3651 17.176 14.748 17.176H7.428C5.81091 17.176 4.5 15.8651 4.5 14.248V6.928C4.5 5.31091 5.81091 4 7.428 4H14.748C16.3651 4 17.676 5.31091 17.676 6.928V14.248Z"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M10.252 20H17.572C19.1891 20 20.5 18.689 20.5 17.072V9.75195"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </svg>
             </span>
