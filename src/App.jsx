@@ -283,6 +283,8 @@ export function KakaoMap({
 function App() {
   const [currentImage, setCurrentImage] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   const [activeTab, setActiveTab] = useState('meal');
   const [showGroomAccounts, setShowGroomAccounts] = useState(false);
@@ -660,24 +662,60 @@ function App() {
 
   const scrollerRef = useRef(null);
 
-  // Navigate to specific image index (no scrolling, just state change)
-  const scrollToIndex = (i) => {
+  // Navigate to specific image index
+  const goToIndex = (i) => {
     const targetIndex = Math.max(0, Math.min(i, images.length - 1));
-    setCurrentImage(targetIndex);
+    if (targetIndex !== currentImage) {
+      setCurrentImage(targetIndex);
+    }
   };
 
   // Navigate to previous image
-  const goToPrevious = () => {
+  const goToPrevious = (e) => {
+    e?.stopPropagation();
+    e?.preventDefault();
     if (currentImage > 0) {
-      scrollToIndex(currentImage - 1);
+      goToIndex(currentImage - 1);
     }
   };
 
   // Navigate to next image
-  const goToNext = () => {
+  const goToNext = (e) => {
+    e?.stopPropagation();
+    e?.preventDefault();
     if (currentImage < images.length - 1) {
-      scrollToIndex(currentImage + 1);
+      goToIndex(currentImage + 1);
     }
+  };
+
+  // Swipe/drag handlers
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentImage < images.length - 1) {
+      goToIndex(currentImage + 1);
+    }
+    if (isRightSwipe && currentImage > 0) {
+      goToIndex(currentImage - 1);
+    }
+    
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
 // Scroll functionality removed - using arrow buttons only
@@ -847,21 +885,21 @@ function App() {
     };
   }, [isGalleryOpen]);
 
-  // Scroll to selected image when gallery opens
-  useEffect(() => {
-    if (isGalleryOpen && scrollerRef.current) {
-      // Use setTimeout to ensure the DOM is ready
-      setTimeout(() => {
-        const el = scrollerRef.current;
-        if (el) {
-          el.scrollTo({
-            left: currentImage * el.clientWidth,
-            behavior: 'instant',
-          });
-        }
-      }, 0);
-    }
-  }, [isGalleryOpen, currentImage]);
+  // // Scroll to selected image when gallery opens
+  // useEffect(() => {
+  //   if (isGalleryOpen && scrollerRef.current) {
+  //     // Use setTimeout to ensure the DOM is ready
+  //     setTimeout(() => {
+  //       const el = scrollerRef.current;
+  //       if (el) {
+  //         el.scrollTo({
+  //           left: currentImage * el.clientWidth,
+  //           behavior: 'instant',
+  //         });
+  //       }
+  //     }, 0);
+  //   }
+  // }, [isGalleryOpen, currentImage]);
 
   const IconSubway = (props) => (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
@@ -2406,7 +2444,7 @@ function App() {
               bottom: 0,
               height: 'calc(var(--vh, 1vh) * 100)', // Lock height
               width: '100%',
-                touchAction: 'pan-x',
+              touchAction: 'pan-x',
               overflow: 'hidden',
             }}
           >
@@ -2433,9 +2471,12 @@ function App() {
               </button>
             </div>
 
-            {/* Image container - no scrolling, only arrow navigation */}
+            {/* Image container - with swipe support */}
             <div
               ref={scrollerRef}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -2445,43 +2486,50 @@ function App() {
                 height: 'calc(var(--vh, 1vh) * 100)',
                 width: '100%',
                 overflow: 'hidden',
-                touchAction: 'none',
+                touchAction: 'pan-y pinch-zoom',
               }}
-              className="flex"
             >
-              {images.map((src, i) => (
-                <div 
-                  key={i} 
-                  className="relative flex-shrink-0"
-                  style={{
-                    height: 'calc(var(--vh, 1vh) * 100)',
-                    width: '100%',
-                    transform: `translateX(-${currentImage * 100}%)`,
-                    transition: 'transform 0.3s ease-in-out',
-                  }}
-                >
-                  <img
-                    src={src}
-                    alt={`Gallery ${i + 1}`}
-                    className="w-full h-full object-contain object-center"
+              <div
+                className="flex"
+                style={{
+                  height: '100%',
+                  width: `${images.length * 100}vw`,
+                  transform: `translateX(-${currentImage * 100}vw)`,
+                  transition: 'transform 0.3s ease-in-out',
+                }}
+              >
+                {images.map((src, i) => (
+                  <div 
+                    key={i} 
+                    className="relative flex-shrink-0"
                     style={{
                       height: 'calc(var(--vh, 1vh) * 100)',
-                      objectFit: 'contain',
-                      objectPosition: imagePositions[src] || 'center',
-                      userSelect: 'none',
-                      WebkitUserSelect: 'none',
-                      touchAction: 'none',
-                      pointerEvents: 'none',
+                      width: '100vw',
                     }}
-                    draggable={false}
-                  />
-                </div>
-              ))}
+                  >
+                    <img
+                      src={src}
+                      alt={`Gallery ${i + 1}`}
+                      className="w-full h-full object-contain object-center"
+                      style={{
+                        height: 'calc(var(--vh, 1vh) * 100)',
+                        objectFit: 'contain',
+                        objectPosition: imagePositions[src] || 'center',
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none',
+                        pointerEvents: 'none',
+                      }}
+                      draggable={false}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Left Arrow - positioned on left side */}
             <button
               onClick={goToPrevious}
+              onMouseDown={(e) => e.stopPropagation()}
               disabled={currentImage === 0}
               aria-label="이전 이미지"
               className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white transition-all ${
@@ -2508,6 +2556,7 @@ function App() {
             {/* Right Arrow - positioned on right side */}
             <button
               onClick={goToNext}
+              onMouseDown={(e) => e.stopPropagation()}
               disabled={currentImage === images.length - 1}
               aria-label="다음 이미지"
               className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white transition-all ${
