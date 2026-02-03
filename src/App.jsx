@@ -604,7 +604,7 @@ function App() {
 
   // Countdown to wedding day
   useEffect(() => {
-    const target = new Date('2026-05-16T11:30:00+09:00'); // KST 기준 2026-05-16 11:"30"
+    const target = new Date('2026-05-16T15:00:00+09:00'); // KST 기준 2026-05-16 15:00
 
     const tick = () => {
       const now = new Date();
@@ -1717,11 +1717,12 @@ function App() {
             </a>
           </div>
         </div>
-        <p className="px-2 py-6 text-sm w-full">
-          *국립외교원은 외교센터와 다른 건물이오니 <br /> 혼동하지 않으시기 바랍니다.
-        </p>
+        
         {/* Detailed Directions */}
         <div className="w-full max-w-2xl space-y-6 px-2">
+        <p className="px-2 pt-6 text-sm">
+          *국립외교원은 외교센터와 다른 건물이오니 <br /> 혼동하지 않으시기 바랍니다.
+        </p>
           {/* Subway Section */}
           <div className="border-y border-gray-200 py-6">
             <div className="flex items-center mb-3">
@@ -1744,7 +1745,7 @@ function App() {
             </div>
           </div>
           {/* Bus Section */}
-          <div className="border-b border-gray-200 pb-4">
+          <div className="border-b border-gray-200 pb-6">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 flex items-center justify-center mr-2">
                 <IconBus className="w-5 h-5 text-gray-400" />
@@ -1775,7 +1776,7 @@ function App() {
           </div>
 
           {/* Car Section */}
-          <div className="border-b border-gray-200 pb-4">
+          <div className="border-b border-gray-200 pb-6">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 flex items-center justify-center mr-3">
                 <IconCar className="w-5 h-5 text-gray-400" />
@@ -1789,7 +1790,7 @@ function App() {
           </div>
 
           {/* Parking Section */}
-          <div className="border-b border-gray-200 pb-4">
+          <div className="border-b border-gray-200 pb-6">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 flex items-center justify-center mr-3">
                 {/* <span className="text-white text-lg font-bold">P</span> */}
