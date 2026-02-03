@@ -1374,7 +1374,7 @@ function App() {
       </section>
 
       {/* Scrollable Content Below Banner */}
-      <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 py-20"> //pb-16 pt-36
+      <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 py-20">
         <ScrollFadeIn delay={0}>
           {/* INVITATION */}
           <span className="block text-lg text-gray-500 tracking-widest mb-2 font-newyork">
@@ -1460,7 +1460,7 @@ function App() {
       </section>
 
       {/* Calendar */}
-      <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 py-20"> // pb-16 pt-36
+      <section className="w-full bg-neutral-100 flex flex-col items-center justify-center px-6 py-24"> 
         <ScrollFadeIn delay={0}>
           <span className="block text-lg text-gray-500 tracking-widest mb-2  font-newyork">
             WEDDING DAY
