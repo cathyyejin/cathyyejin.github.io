@@ -3121,7 +3121,7 @@ function App() {
           </div>
         </div>
       )}
-      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-6 mb-16">
+      <section className="w-full bg-white flex flex-col items-center justify-center px-6 py-6">
         {/* Share / Copy row */}
         <div className="w-full max-w-md mx-auto space-y-3">
           {/* Kakao share button */}
@@ -3184,7 +3184,7 @@ function App() {
         </div>
       </section>
       <section>
-        <div className="w-full px-6 py-2 mb-2">
+        <div className="w-full px-6 py-3 mb-4">
           <p className="text-gray-600 text-center text-sm">
             Copyright © 2026 Yejin Park. All rights reserved.
           </p>
