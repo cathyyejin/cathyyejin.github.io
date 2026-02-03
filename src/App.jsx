@@ -1673,7 +1673,7 @@ function App() {
           <button
             onClick={() => copyAddress('서울 서초구 남부순환로 2572')}
             // className="w-full bg-cyan-500 text-white py-3 px-4 rounded-lg hover:bg-cyan-600 transition-colors"
-            className="w-full bg-white border border-gray-200 rounded-lg py-2 px-4 shadow-sm"
+            className="w-full bg-white border border-gray-200 rounded-lg py-2 px-4"
           >
             주소 복사하기
           </button>
@@ -1700,7 +1700,7 @@ function App() {
               href="https://tmap.life/ab5faa4e"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
+              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-md px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
             >
               <img
                 src="/img/tmap.png"
@@ -1714,7 +1714,7 @@ function App() {
               href="https://place.map.kakao.com/8490883"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
+              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-md px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
             >
               <img
                 src="/img/kakao.png"
@@ -1728,7 +1728,7 @@ function App() {
               href="https://naver.me/5uIYnFoR"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
+              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-md px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
             >
               <img
                 src="/img/naver.png"
