@@ -603,19 +603,29 @@ function App() {
   }, []);
 
   // Countdown to wedding day
+  const [isPastDate, setIsPastDate] = useState(false);
+  
   useEffect(() => {
     const target = new Date('2026-05-16T15:00:00+09:00'); // KST 기준 2026-05-16 15:00
 
     const tick = () => {
       const now = new Date();
-      const diff = Math.max(target.getTime() - now.getTime(), 0);
-
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor(diff / (1000 * 60 * 60)) % 24;
-      const minutes = Math.floor(diff / (1000 * 60)) % 60;
-      const seconds = Math.floor(diff / 1000) % 60;
-
-      setCountdown({ days, hours, minutes, seconds });
+      const diff = target.getTime() - now.getTime();
+      
+      if (diff <= 0) {
+        // Date has passed
+        const daysPassed = Math.floor(Math.abs(diff) / (1000 * 60 * 60 * 24));
+        setCountdown({ days: daysPassed, hours: 0, minutes: 0, seconds: 0 });
+        setIsPastDate(true);
+      } else {
+        // Date hasn't passed yet
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(diff / (1000 * 60 * 60)) % 24;
+        const minutes = Math.floor(diff / (1000 * 60)) % 60;
+        const seconds = Math.floor(diff / 1000) % 60;
+        setCountdown({ days, hours, minutes, seconds });
+        setIsPastDate(false);
+      }
     };
 
     tick(); // 초기 값 설정
@@ -1549,47 +1559,59 @@ function App() {
         </div>
         {/* Countdown */}
         <div className="w-full max-w-2xl mt-6 flex flex-col items-center gap-4">
-          <div className="grid grid-cols-4 gap-2 sm:gap-3 w-full">
-            <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
-              <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+          {!isPastDate ? (
+            <>
+              <div className="grid grid-cols-4 gap-2 sm:gap-3 w-full">
+                <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                    {countdown.days}
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
+                    DAYS
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                    {countdown.hours.toString().padStart(2, '0')}
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
+                    HOURS
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                    {countdown.minutes.toString().padStart(2, '0')}
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
+                    MINUTES
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
+                    {countdown.seconds.toString().padStart(2, '0')}
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
+                    SECONDS
+                  </div>
+                </div>
+              </div>
+              <div className="text-sm text-gray-600">
+                덕곤 ❤ 동민 결혼식이{' '}
+                <span className="font-semibold text-rose-500">
+                  {countdown.days}
+                </span>
+                일 남았습니다
+              </div>
+            </>
+          ) : (
+            <div className="text-sm text-gray-600">
+              덕곤 ❤ 동민 결혼식이{' '}
+              <span className="font-semibold text-rose-500">
                 {countdown.days}
-              </div>
-              <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
-                DAYS
-              </div>
+              </span>
+              일 지났습니다
             </div>
-            <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
-              <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
-                {countdown.hours.toString().padStart(2, '0')}
-              </div>
-              <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
-                HOURS
-              </div>
-            </div>
-            <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
-              <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
-                {countdown.minutes.toString().padStart(2, '0')}
-              </div>
-              <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
-                MINUTES
-              </div>
-            </div>
-            <div className="bg-white rounded-2xl shadow p-3 sm:p-4 text-center">
-              <div className="text-2xl sm:text-3xl font-semibold text-gray-900">
-                {countdown.seconds.toString().padStart(2, '0')}
-              </div>
-              <div className="text-[10px] sm:text-xs text-gray-500 mt-1 tracking-wide">
-                SECONDS
-              </div>
-            </div>
-          </div>
-          <div className="text-sm text-gray-600">
-            덕곤 ❤ 동민 결혼식이{' '}
-            <span className="font-semibold text-rose-500">
-              {countdown.days}
-            </span>
-            일 남았습니다
-          </div>
+          )}
         </div>
         </ScrollFadeIn>
       </section>
@@ -1678,7 +1700,7 @@ function App() {
               href="https://tmap.life/ab5faa4e"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-colors px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
+              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
             >
               <img
                 src="/img/tmap.png"
@@ -1692,7 +1714,7 @@ function App() {
               href="https://place.map.kakao.com/8490883"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-colors px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
+              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
             >
               <img
                 src="/img/kakao.png"
@@ -1706,7 +1728,7 @@ function App() {
               href="https://naver.me/5uIYnFoR"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 transition-colors px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
+              className="flex items-center justify-center gap-1.5 bg-gray-50 text-gray-700 rounded-md px-2 py-3 whitespace-nowrap [font-size:clamp(13px,2.9vw,15px)]"
             >
               <img
                 src="/img/naver.png"
