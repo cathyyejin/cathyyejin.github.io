@@ -1095,10 +1095,10 @@ function App() {
               </h3>
               <p className="text-gray-700 mb-2">식사는 결혼식 및 사진 촬영이</p>
               <p className="text-gray-700 mb-2">끝난 후, 외교원 지하 1층에서</p>
-              <p className="text-gray-700 mb-6">뷔폐식으로 진행됩니다.</p>
+              <p className="text-gray-700 mb-6">뷔페식으로 진행됩니다.</p>
               <p className="text-gray-700 mb-2">부족함 없이 즐기실 수 있도록</p>
               <p className="text-gray-700 mb-2">
-                한식을 비롯해 중식, 양식, 일식등
+                한식을 비롯해 중식, 양식, 일식 등
               </p>
               <p className="text-gray-700 mb-2">
                 다양한 메뉴가 준비되어 있습니다.
